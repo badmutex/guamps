@@ -4,14 +4,20 @@
 #include "io.h"
 #include "gmxutil.h"
 
-int main(int argc, char *argv[]){
-  const char *cpt_path = argv[1];
-  const char *selstr   = argv[2];
-
-  // initialize gromacs
+int init_gmx(){
   gmx_init_params_t gmx_params;
   gmx_params.program_name = "guamps_get";
-  guamps_init_gromacs(&gmx_params);
+  return guamps_init_gromacs(&gmx_params);
+}
+
+int main(int argc, char *argv[]){
+  if (!init_gmx()) {
+    fprintf(stderr, "Unable to initialize GROMACS\n");
+    return 1;
+  }
+
+  const char *cpt_path = argv[1];
+  const char *selstr   = argv[2];
 
   gmx_data_t r;
   selector_t selector;
