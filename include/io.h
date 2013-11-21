@@ -22,11 +22,6 @@ typedef struct gmx_data_s {
     } data;
 } gmx_data_t;
 
-typedef union selection_result_u {
-    rvec *vec;
-    int  count;
-} selection_result_t;
-
 
 int guamps_read_checkpoint_X(const char *path, const char *selector, gmx_data_t *result);
 int guamps_get_state_X(const t_state *state, const char *selector, gmx_data_t *result);
