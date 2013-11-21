@@ -4,9 +4,9 @@
 #include "gmxutil.h"
 
 int main(int argc, char *argv[]){
-  const char *cpt_path = "../state0.cpt";
-  const char *sel     = "velocity";
-  selection_result_t r;
+  const char *cpt_path = argv[1];
+  const char *sel     = argv[2];
+  gmx_data_t r;
 
   gmx_init_params_t gmx_params;
   gmx_params.program_name = "guamps_get";
