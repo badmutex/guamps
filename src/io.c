@@ -1,34 +1,33 @@
 #include "io.h"
 
-int guamps_read_checkpoint_X(const char *path, const char *selector, void * result) {
+int guamps_read_checkpoint_X(const char *path, const char *selector, selection_result_t *result) {
 
   int part;
   gmx_large_int_t step;
   double time;
   t_state state;
+  init_state(&state, -1, -1, -1, -1);
 
   read_checkpoint_state(path, &part, &step, &time, &state);
 
   return guamps_get_state_X(&state, selector, result);
 }
 
-int guamps_get_state_X(const t_state *state, const char *selector, void * result) {
+int guamps_get_state_X(const t_state *state, const char *selector, selection_result_t *result) {
 
   const char *sel = selector;
   const t_state *st = state;
-  void *r = result;
 
-  if      (strcmp(sel, "natoms")) {
-    *((int *) r) = st->natoms;
+  if      (strcmp(sel, "natoms") == 0) {
+    result->count = st->natoms;
     return 0;
   }
-  else if (strcmp(sel, "position")) {
-    rvec * v = (rvec *) r;
-    TODO v = st->x;
+  else if (strcmp(sel, "position") == 0) {
+    result->vec = st->x;
     return 0;
   }
-  else if (strcmp(sel, "velocity")) {
-    /* (rvec *) r = st->v; */
+  else if (strcmp(sel, "velocity") == 0) {
+    result->vec = st->v;
     return 0;
   }
   else {

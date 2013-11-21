@@ -1,9 +1,21 @@
 
 include ../Makefile.config
 
-coords : coords.o io.o
-	${cc} ${cflags} -lgmx $^ -o $@
+names = io gmxutil get
+objects = $(addsuffix .o, ${names})
 
-%.o : %.c ../include/%.h
-	$(cc) $(cflags) ${includes} -c $< -o $@
+programs = get
 
+.phony: all
+all : ${programs} ${objects}
+
+get : ${objects}
+	${cc} -lgmx $^ -o $@
+
+%.o : %.c ${myinc}/*.h ../Makefile.config
+	${cc} ${cflags} ${includes} -c $< -o $@
+
+
+.phony: clean
+clean :
+	rm -f *.o ${programs}

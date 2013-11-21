@@ -10,10 +10,16 @@
 #include "gromacs/checkpoint.h"
 
 
-int guamps_read_checkpoint_X(const char *path, const char *selector, void *result);
+typedef union selection_result_u {
+    rvec *vec;
+    int  count;
+} selection_result_t;
 
-int guamps_read_tpr_X(const char *path, const char *selector, void *result);
-int guamps_get_state_X(const t_state *state, const char *selector, void *result);
+
+int guamps_read_checkpoint_X(const char *path, const char *selector, selection_result_t *result);
+
+int guamps_read_tpr_X(const char *path, const char *selector, selection_result_t *result);
+int guamps_get_state_X(const t_state *state, const char *selector, selection_result_t *result);
 
 int guamps_get_state_coords(const t_state *state, rvec *vec);
 int guamps_get_state_(const t_state *state, rvec *vec);
