@@ -47,13 +47,17 @@ int guamps_write(FILE *fh, const gmx_data_t *data) {
     guamps_write_rvec(fh, data->data.vector.rvec, data->data.vector.natoms);
     break;
   case INT:
-    /* guamps_write_int(fh, data->data.number); */
+    guamps_write_int(fh, data->data.number);
     break;
   default:
     return 0;
     break;
   }
   return 1;
+}
+
+int guamps_write_int(FILE *fh, const int i){
+  return fprintf(fh, "%d\n", i);
 }
 
 int guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
