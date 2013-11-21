@@ -2,7 +2,30 @@
 
 #include "io.h"
 
-int guamps_read_checkpoint_X(const char *path, const char *selector, gmx_data_t *result) {
+int guamps_pick_selector(const char *str, selector_t *sel) {
+  if (0 == strcmp(str, "natoms")) {
+    *sel = NATOMS; }
+  else if (0 == strcmp(str, "positions")) {
+    *sel = POSITIONS; }
+  else if (0 == strcmp(str, "velocities")) {
+    *sel = VELOCITIES; }
+  else if (0 == strcmp(str, "forces")) {
+    *sel = FORCES; }
+  else if (0 == strcmp(str, "lambda")) {
+    *sel = LAMBDA; }
+  else if (0 == strcmp(str, "box")) {
+    *sel = BOX; }
+  else if (0 == strcmp(str, "step")) {
+    *sel = STEP; }
+  else if (0 == strcmp(str, "time")) {
+    *sel = TIME; }
+  else {
+    return false;
+  }
+  return true;
+}
+
+int guamps_read_checkpoint_X(const char *path, const selector_t selector, gmx_data_t *result) {
 
   int part;
   gmx_large_int_t step;
@@ -15,30 +38,29 @@ int guamps_read_checkpoint_X(const char *path, const char *selector, gmx_data_t 
   return guamps_get_state_X(&state, selector, result);
 }
 
-int guamps_get_state_X(const t_state *state, const char *selector, gmx_data_t *result) {
+int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *result) {
 
-  const char *sel = selector;
-  const t_state *st = state;
-
-  if      (strcmp(sel, "natoms") == 0) {
+  switch (sel) {
+  case NATOMS:
     result->type        = INT;
     result->data.number = st->natoms;
     return true;
-  }
-  else if (strcmp(sel, "position") == 0) {
+    break;
+  case POSITIONS:
     result->type	       = RVEC;
     result->data.vector.rvec   = st->x;
     result->data.vector.natoms = st->natoms;
     return true;
-  }
-  else if (strcmp(sel, "velocity") == 0) {
+    break;
+  case VELOCITIES:
     result->type               = RVEC;
     result->data.vector.rvec   = st->v;
     result->data.vector.natoms = st->natoms;
     return true;
-  }
-  else {
+    break;
+  default:
     return false;
+    break;
   }
 
 }
