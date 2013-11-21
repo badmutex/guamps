@@ -5,26 +5,8 @@
 #include "stdio.h"
 #include "string.h"
 
-#include "gromacs/types/state.h"
-#include "gromacs/tpxio.h"
-#include "gromacs/checkpoint.h"
+#include "types.h"
 
-typedef struct gmx_rvec_s {
-rvec *rvec;
-int  natoms;
-} gmx_rvec_t;
-
-typedef struct gmx_data_s {
-    enum type_e { RVEC, INT } type;
-    union data_u {
-        gmx_rvec_t vector;
-        int number;
-    } data;
-} gmx_data_t;
-
-typedef enum selector_e {
-    NATOMS, POSITIONS, VELOCITIES, FORCES, LAMBDA, BOX, STEP, TIME
-} selector_t;
 
 int guamps_pick_selector(const char *selstr, selector_t *sel);
 int guamps_read_checkpoint_X(const char *path, const selector_t sel, gmx_data_t *result);
