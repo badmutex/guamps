@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
   guamps_init_gromacs(&gmx_params);
 
   guamps_read_checkpoint_X(cpt_path, sel, &r);
-  guamps_write_rvec(stdout, r.data.rvec, 551);
+  guamps_write(stdout, &r);
     
   
 
