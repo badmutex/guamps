@@ -9,10 +9,15 @@
 #include "gromacs/tpxio.h"
 #include "gromacs/checkpoint.h"
 
+typedef struct gmx_rvec_s {
+rvec *rvec;
+int  natoms;
+} gmx_rvec_t;
+
 typedef struct gmx_data_s {
     enum type_e { RVEC, INT } type;
     union data_u {
-        rvec *rvec;
+        gmx_rvec_t vector;
         int number;
     } data;
 } gmx_data_t;

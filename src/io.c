@@ -19,24 +19,41 @@ int guamps_get_state_X(const t_state *state, const char *selector, gmx_data_t *r
   const t_state *st = state;
 
   if      (strcmp(sel, "natoms") == 0) {
-    result->type         = INT;
+    result->type        = INT;
     result->data.number = st->natoms;
     return 0;
   }
   else if (strcmp(sel, "position") == 0) {
-    result->type = RVEC;
-    result->data.rvec = st->x;
+    result->type	       = RVEC;
+    result->data.vector.rvec   = st->x;
+    result->data.vector.natoms = st->natoms;
     return 0;
   }
   else if (strcmp(sel, "velocity") == 0) {
-    result->type = RVEC;
-    result->data.rvec = st->v;
+    result->type               = RVEC;
+    result->data.vector.rvec   = st->v;
+    result->data.vector.natoms = st->natoms;
     return 0;
   }
   else {
     return 1;
   }
 
+}
+
+int guamps_write(FILE *fh, const gmx_data_t *data) {
+  switch(data->type) {
+  case RVEC:
+    guamps_write_rvec(fh, data->data.vector.rvec, data->data.vector.natoms);
+    break;
+  case INT:
+    /* guamps_write_int(fh, data->data.number); */
+    break;
+  default:
+    return 0;
+    break;
+  }
+  return 1;
 }
 
 int guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
