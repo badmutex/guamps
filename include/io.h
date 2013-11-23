@@ -14,6 +14,7 @@ int guamps_get_state_X(const t_state *state, const selector_t sel, gmx_data_t *r
 int guamps_write(FILE *fh, const gmx_data_t *data);
 int guamps_write_int(FILE *fh, const int);
 int guamps_write_rvec(FILE *fh, const rvec *vec, const int length);
+int guamps_pick_filetype(const char *path, filetype_t *type);
 
 int guamps_read_tpr_X(const char *path, const char *selector, selection_result_t *result);
 int guamps_read_checkpoint(const char *path, t_state *state);

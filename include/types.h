@@ -23,4 +23,8 @@ typedef enum selector_e {
     NATOMS, POSITIONS, VELOCITIES, FORCES, LAMBDA, BOX, STEP, TIME
 } selector_t;
 
+typedef enum filetype_e {
+  CPT, TPR
+} filetype_t;
+
 #endif

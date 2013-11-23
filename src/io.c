@@ -102,3 +102,26 @@ int guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
   return true;
 }
 
+
+int guamps_pick_filetype(const char *path, filetype_t *type) {
+  const char
+    *cpt = ".cpt",
+    *tpr = ".tpr";
+
+  const char *suffix = strrchr(path, '.');
+
+  if (suffix == NULL){
+    return false;
+  } else if (0 == strcmp(suffix, cpt)) {
+    *type = CPT;
+    return true;
+  } else if (0 == strcmp(suffix, tpr)) {
+    *type = TPR;
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+
