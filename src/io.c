@@ -124,4 +124,41 @@ int guamps_pick_filetype(const char *path, filetype_t *type) {
 
 }
 
+int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result) {
 
+  t_inputrec ir;
+  t_state st;
+  rvec *forces;
+  gmx_mtop_t mtop;
+
+  init_inputrec(&ir);
+  init_state(&st, -1, -1, -1, -1);
+  init_mtop(&mtop);
+
+  // check to see if the forces can be read
+  t_tpxheader header;
+  int version, generation;
+  read_tpxheader(path, &header,
+		 FALSE, // runtime error on version mismatch
+		 &version, &generation);
+  if (!header.bF) {
+    forces = NULL;
+  } else {
+    snew(forces, header.natoms);
+  }
+
+  // read the data
+  read_tpx_state(path, &ir, &st, forces, &mtop);
+
+
+  // store the result
+  if (sel == FORCES && header.bF) {
+    result->type	       = RVEC;
+    result->data.vector.rvec   = forces;
+    result->data.vector.natoms = header.natoms;
+    return true;
+  } else {
+    return guamps_get_state_X(&st, sel, result);
+  }
+
+}
