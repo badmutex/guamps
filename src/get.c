@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  const char *cpt_path = argv[1];
+  const char *path = argv[1];
   const char *selstr   = argv[2];
 
   gmx_data_t r;
@@ -26,10 +26,33 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  if (guamps_read_checkpoint_X(cpt_path, selector, &r))
-    guamps_write(stdout, &r);
-    
-  
 
-  return 0;
+  // read and select
+  filetype_t ftype;
+  guamps_pick_filetype(path, &ftype);
+
+  int ok = false;
+  switch (ftype) {
+  case CPT:
+    ok = guamps_read_checkpoint_X(path, selector, &r);
+    break;
+  case TPR:
+    ok = guamps_read_tpr_X(path, selector, &r);
+    break;
+  default:
+    fprintf(stderr, "Unable to read: %s\n", path);
+    break;
+  }
+
+
+  // write result
+  if (ok) {
+    guamps_write(stdout, &r);
+    return 0;
+  } else {
+    fprintf(stderr, "Something went wrong :(\n");
+    return 1;
+  }
+
+
 }
