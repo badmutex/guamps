@@ -1,16 +1,27 @@
 
 include ../Makefile.config
 
-names = io gmxutil get
-objects = $(addsuffix .o, ${names})
+libnames = io gmxutil
+libobjs = $(addsuffix .o, ${libnames})
 
-programs = get
+prognames = get test
+progobjs = $(addsuffix .o, ${prognames})
+
+allobjs = $(join ${libobjs}, ${progobjs})
 
 .phony: all
-all : ${programs} ${objects}
+all : ${libobjs} ${prognames}
 
-get : ${objects}
-	${cc} -lgmx $^ -o $@
+# get : ${objects}
+# 	${cc} -lgmx $^ -o $@
+
+get : ${libobjs} get.o
+	${cc} ${ldflags} $^ -o $@
+
+
+test : ${libobjs} test.o
+	${cc} ${ldflags} $^ -o $@
+
 
 %.o : %.c ${myinc}/*.h ../Makefile.config
 	${cc} ${cflags} ${includes} -c $< -o $@
@@ -18,4 +29,4 @@ get : ${objects}
 
 .phony: clean
 clean :
-	rm -f *.o ${programs}
+	rm -f *.o ${objects} ${prognames}
