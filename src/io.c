@@ -42,18 +42,18 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *resu
 
   switch (sel) {
   case NATOMS:
-    result->type        = INT;
+    result->type        = INT_T;
     result->data.number = st->natoms;
     return true;
     break;
   case POSITIONS:
-    result->type	       = RVEC;
+    result->type	       = RVEC_T;
     result->data.vector.rvec   = st->x;
     result->data.vector.natoms = st->natoms;
     return true;
     break;
   case VELOCITIES:
-    result->type               = RVEC;
+    result->type               = RVEC_T;
     result->data.vector.rvec   = st->v;
     result->data.vector.natoms = st->natoms;
     return true;
@@ -71,10 +71,10 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *resu
 
 int guamps_write(FILE *fh, const gmx_data_t *data) {
   switch(data->type) {
-  case RVEC:
+  case RVEC_T:
     return guamps_write_rvec(fh, data->data.vector.rvec, data->data.vector.natoms);
     break;
-  case INT:
+  case INT_T:
     return guamps_write_int(fh, data->data.number);
     break;
   default:
@@ -157,7 +157,7 @@ int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result
 
   // store the result
   if (sel == FORCES && header.bF) {
-    result->type	       = RVEC;
+    result->type	       = RVEC_T;
     result->data.vector.rvec   = forces;
     result->data.vector.natoms = header.natoms;
     return true;

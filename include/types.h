@@ -13,7 +13,7 @@ typedef struct gmx_rvec_s {
 } gmx_rvec_t;
 
 typedef struct gmx_data_s {
-  enum type_e { RVEC, INT, T_RNG } type;
+  enum type_e { RVEC_T, INT_T, RNG_T } type;
   union data_u {
     gmx_rvec_t vector;
     int number;
