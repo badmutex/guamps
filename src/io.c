@@ -58,6 +58,10 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *resu
     result->data.vector.natoms = st->natoms;
     return true;
     break;
+  case RNG:
+    guamps_error("Getting RNG state from GMX t_state is not supported\n");
+    return false;
+    break;
   default:
     return false;
     break;
@@ -161,4 +165,13 @@ int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result
     return guamps_get_state_X(&st, sel, result);
   }
 
+}
+
+
+void guamps_error(const char *str) {
+  const char *extra = "[GUAMPS] ";
+  char *msg = (char *) calloc (strlen(extra) + strlen(str), sizeof(char));
+  strcat(msg, extra);
+  strcat(msg, str);
+  fputs(msg, stderr);
 }

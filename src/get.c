@@ -16,8 +16,8 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  const char *path = argv[1];
-  const char *selstr   = argv[2];
+  const char *path   = argv[1];
+  const char *selstr = argv[2];
 
   gmx_data_t r;
   selector_t selector;
