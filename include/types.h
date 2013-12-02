@@ -12,6 +12,11 @@ typedef struct gmx_rvec_s {
   int  natoms;
 } gmx_rvec_t;
 
+/**
+   Initialize a gromacs rvec with `natom`
+ */
+gmx_rvec_t * guamps_init_gmx_rvec(int natoms);
+
 // used in the data
 typedef enum type_e {
   RVEC_T, // gmx `rvec`
@@ -39,9 +44,6 @@ typedef enum selector_e {
 typedef enum filetype_e {
   CPT, TPR
 } filetype_t;
-
-gmx_rvec_t * guamps_init_gmx_rvec(int natoms);
-
 
 
 #endif
