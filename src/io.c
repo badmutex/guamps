@@ -312,3 +312,21 @@ int guamps_selector_type(const selector_t sel, type_t *type) {
   return retval;
 
 }
+
+int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data) {
+
+  type_t type;
+  if(!guamps_selector_type(sel, &type)) {guamps_error("Unable to choose parser for file\n"); return false;}
+
+  switch(type) {
+  case INT_T:
+    return guamps_read_int(fh, data);
+    break;
+  case RVEC_T:
+    return guamps_read_rvec(fh, data);
+    break;
+  default:
+    guamps_error("I don't know how to read files of type %s\n", GUAMPS_TYPE_NAMES[type]);
+    return false;
+  }
+}

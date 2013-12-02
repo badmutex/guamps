@@ -22,6 +22,7 @@ void guamps_error(const char *str, ...);
 int guamps_read_rvec(FILE *fh, guamps_data_t *data);
 int guamps_selector_type(const selector_t sel, type_t *type);
 int guamps_read_int(FILE *fh, guamps_data_t *data);
+int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data);
 
 
 #endif
