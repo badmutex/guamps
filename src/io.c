@@ -179,3 +179,39 @@ void guamps_error(const char *str, ...) {
   vfprintf(stderr, msg, args);
   va_end(args);
 }
+
+
+/**
+   Read the header of a vector file.
+
+   Use `fgets` to read `size` bytes from `stream` into `buffer` and
+   call `sscanf` to parse `expected` values given in `fmt` from `buffer` to `dst`
+
+   @param name: the name of this portion of header for the error message on failure
+   @param buffer: where to store the data
+   @param size: buffer size
+   @param stream: the file handle to read from
+   @param fmt: format to parse
+   @param dst: store parsed result here
+   @param expected: expected number of parsed values (currently must be 1)
+   @return `true` for success, `false` otherwise` after printing message to stderr
+ */
+static int guamps_read_vector_header(const char *name,
+				           char *buffer,
+				     const int   size,
+				           FILE *stream,
+				     const char *fmt,
+				           void *dst,
+				     const int   expected) {
+
+  if(fgets(buffer, size, stream) == NULL){
+    guamps_error("Error reading '%s' from header\n", name);
+    return false;
+  } else if (sscanf(buffer, fmt, dst) != expected) {
+    guamps_error("Error parsing header '%s' for %d values from string: '%s'\n", name, expected, buffer);
+    return false;
+  } else {
+    return true;
+  }
+
+}
