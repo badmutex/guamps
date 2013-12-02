@@ -168,10 +168,14 @@ int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result
 }
 
 
-void guamps_error(const char *str) {
+void guamps_error(const char *str, ...) {
   const char *extra = "[GUAMPS] ";
   char *msg = (char *) calloc (strlen(extra) + strlen(str), sizeof(char));
   strcat(msg, extra);
   strcat(msg, str);
-  fputs(msg, stderr);
+
+  va_list args;
+  va_start(args, str);
+  vfprintf(stderr, msg, args);
+  va_end(args);
 }
