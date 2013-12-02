@@ -29,4 +29,6 @@ typedef enum filetype_e {
   CPT, TPR
 } filetype_t;
 
+gmx_rvec_t * guamps_init_gmx_rvec(int natoms);
+
 #endif
