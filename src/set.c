@@ -13,6 +13,9 @@ int init_gmx(){
 
 int main(int argc, char *argv[]) {
 
+  // for return code checking
+  int ok = true;
+
   if (!init_gmx()) {
     fprintf(stderr, "Unable to initialize GROMACS\n");
     return 1;
@@ -34,7 +37,12 @@ int main(int argc, char *argv[]) {
   filetype_t ftype;
   guamps_pick_filetype(path, &ftype);
 
-  FILE *fh = fopen(datpath, "r");
-  guamps_read_rvec(fh, &r);
+  // read the data
+  FILE *fh;
+  if (!(fh = fopen(datpath, "r"))) { guamps_error("Failed to open: %s\n", datpath); return 1;}
+  if (!guamps_read_rvec(fh, &r)) { guamps_error("Failed to read vector data in: %s\n", datpath); return 1; }
+  fclose(fh);
+
+
 
 }
