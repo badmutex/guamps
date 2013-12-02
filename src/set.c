@@ -40,8 +40,11 @@ int main(int argc, char *argv[]) {
   // read the data
   FILE *fh;
   if (!(fh = fopen(datpath, "r"))) { guamps_error("Failed to open: %s\n", datpath); return 1;}
-  if (!guamps_read_rvec(fh, &r)) { guamps_error("Failed to read vector data in: %s\n", datpath); return 1; }
+  if (!guamps_read(fh, selector, &r)) { return 1; }
   fclose(fh);
+
+  // debugging
+  guamps_write(stdout, &r);
 
 
 
