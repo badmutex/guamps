@@ -59,7 +59,7 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, guamps_data_t *r
     return true;
     break;
   case RNG:
-    guamps_error("Getting RNG state from GMX t_state is not supported\n");
+    guamps_error("guamps_get_state_X: Getting RNG state from GMX t_state is not supported\n");
     return false;
     break;
   default:
@@ -205,10 +205,10 @@ static int guamps_read_vector_header(const char *name,
 				     const int   expected) {
 
   if(fgets(buffer, size, stream) == NULL){
-    guamps_error("Error reading '%s' from header\n", name);
+    guamps_error("guamps_read_vector_header: Error reading '%s' from header\n", name);
     return false;
   } else if (sscanf(buffer, fmt, dst) != expected) {
-    guamps_error("Error parsing header '%s' for %d values from string: '%s'\n", name, expected, buffer);
+    guamps_error("guamps_read_vector_header: Error parsing header '%s' for %d values from string: '%s'\n", name, expected, buffer);
     return false;
   } else {
     return true;
@@ -254,7 +254,7 @@ int guamps_read_rvec(FILE *fh, guamps_data_t *data) {
 
     fgets(buffer, buffer_size, fh);
     if (sscanf(buffer, "%f", &val) != 1) {
-      guamps_error("Failed to parse value from value %d: '%s'\n", lineno+1, buffer);
+      guamps_error("guamps_read_rvec: Failed to parse value from value %d: '%s'\n", lineno+1, buffer);
       return false;
     }
 
@@ -304,7 +304,7 @@ int guamps_selector_type(const selector_t sel, type_t *type) {
     *type = INT_T;
     break;
   default:
-    guamps_error("Unknown type for selector value %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_selector_type: Unknown type for selector value %s\n", GUAMPS_SELECTOR_NAMES[sel]);
     retval = false;
     break;
   }
@@ -316,7 +316,7 @@ int guamps_selector_type(const selector_t sel, type_t *type) {
 int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data) {
 
   type_t type;
-  if(!guamps_selector_type(sel, &type)) {guamps_error("Unable to choose parser for file\n"); return false;}
+  if(!guamps_selector_type(sel, &type)) {guamps_error("guamps_read: Unable to choose parser for file\n"); return false;}
 
   switch(type) {
   case INT_T:
@@ -326,7 +326,7 @@ int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data) {
     return guamps_read_rvec(fh, data);
     break;
   default:
-    guamps_error("I don't know how to read files of type %s\n", GUAMPS_TYPE_NAMES[type]);
+    guamps_error("guamps_read: I don't know how to read files of type %s\n", GUAMPS_TYPE_NAMES[type]);
     return false;
   }
 }
