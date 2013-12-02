@@ -7,8 +7,6 @@
 #include "string.h"
 #include "types.h"
 
-#include "gromacs/smalloc.h"
-
 
 int guamps_pick_selector(const char *selstr, selector_t *sel);
 int guamps_read_checkpoint_X(const char *path, const selector_t sel, guamps_data_t *result);

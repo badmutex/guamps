@@ -2,6 +2,9 @@
 
 #include "io.h"
 
+#include "gromacs/smalloc.h"
+
+
 int guamps_pick_selector(const char *str, selector_t *sel) {
   if (0 == strcmp(str, "natoms")) {
     *sel = NATOMS; }
