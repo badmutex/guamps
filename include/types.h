@@ -12,14 +12,14 @@ typedef struct gmx_rvec_s {
   int  natoms;
 } gmx_rvec_t;
 
-typedef struct gmx_data_s {
+typedef struct guamps_data_s {
   enum type_e { RVEC_T, INT_T, RNG_T } type;
   union data_u {
-    gmx_rvec_t vector;
-    int number;
-    gmx_rng_t rng;
+    gmx_rvec_t rvec  ;  // RVEC_T
+    int        number;  // INT_T
+    gmx_rng_t  rng   ;  // RNG_T
   } data;
-} gmx_data_t;
+} guamps_data_t;
 
 typedef enum selector_e {
   NATOMS, POSITIONS, VELOCITIES, FORCES, LAMBDA, BOX, STEP, TIME, RNG

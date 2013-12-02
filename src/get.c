@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
   const char *path   = argv[1];
   const char *selstr = argv[2];
 
-  gmx_data_t r;
+  guamps_data_t r;
   selector_t selector;
   if (!guamps_pick_selector(selstr, &selector)) {
     fprintf(stderr, "Unknown selection: %s\n", selstr);

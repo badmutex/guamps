@@ -25,7 +25,7 @@ int guamps_pick_selector(const char *str, selector_t *sel) {
   return true;
 }
 
-int guamps_read_checkpoint_X(const char *path, const selector_t selector, gmx_data_t *result) {
+int guamps_read_checkpoint_X(const char *path, const selector_t selector, guamps_data_t *result) {
 
   int part;
   gmx_large_int_t step;
@@ -38,7 +38,7 @@ int guamps_read_checkpoint_X(const char *path, const selector_t selector, gmx_da
   return guamps_get_state_X(&state, selector, result);
 }
 
-int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *result) {
+int guamps_get_state_X(const t_state *st, const selector_t sel, guamps_data_t *result) {
 
   switch (sel) {
   case NATOMS:
@@ -47,15 +47,15 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *resu
     return true;
     break;
   case POSITIONS:
-    result->type	       = RVEC_T;
-    result->data.vector.rvec   = st->x;
-    result->data.vector.natoms = st->natoms;
+    result->type	     = RVEC_T;
+    result->data.rvec.rvec   = st->x;
+    result->data.rvec.natoms = st->natoms;
     return true;
     break;
   case VELOCITIES:
-    result->type               = RVEC_T;
-    result->data.vector.rvec   = st->v;
-    result->data.vector.natoms = st->natoms;
+    result->type             = RVEC_T;
+    result->data.rvec.rvec   = st->v;
+    result->data.rvec.natoms = st->natoms;
     return true;
     break;
   case RNG:
@@ -69,10 +69,10 @@ int guamps_get_state_X(const t_state *st, const selector_t sel, gmx_data_t *resu
 
 }
 
-int guamps_write(FILE *fh, const gmx_data_t *data) {
+int guamps_write(FILE *fh, const guamps_data_t *data) {
   switch(data->type) {
   case RVEC_T:
-    return guamps_write_rvec(fh, data->data.vector.rvec, data->data.vector.natoms);
+    return guamps_write_rvec(fh, data->data.rvec.rvec, data->data.rvec.natoms);
     break;
   case INT_T:
     return guamps_write_int(fh, data->data.number);
@@ -128,7 +128,7 @@ int guamps_pick_filetype(const char *path, filetype_t *type) {
 
 }
 
-int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result) {
+int guamps_read_tpr_X(const char *path, const selector_t sel, guamps_data_t *result) {
 
   t_inputrec ir;
   t_state st;
@@ -157,9 +157,9 @@ int guamps_read_tpr_X(const char *path, const selector_t sel, gmx_data_t *result
 
   // store the result
   if (sel == FORCES && header.bF) {
-    result->type	       = RVEC_T;
-    result->data.vector.rvec   = forces;
-    result->data.vector.natoms = header.natoms;
+    result->type	     = RVEC_T;
+    result->data.rvec.rvec   = forces;
+    result->data.rvec.natoms = header.natoms;
     return true;
   } else {
     return guamps_get_state_X(&st, sel, result);
@@ -219,7 +219,7 @@ static int guamps_read_vector_header(const char *name,
 /**
    Read a vector data file.
  */
-int guamps_read_rvec(FILE *fh, gmx_data_t *data) {
+int guamps_read_rvec(FILE *fh, guamps_data_t *data) {
 
   int ncells, ncoords, ndims;
   const int buffer_size = 100;
@@ -239,8 +239,8 @@ int guamps_read_rvec(FILE *fh, gmx_data_t *data) {
 
   // result value
   data->type = RVEC_T;
-  data->data.vector = *guamps_init_gmx_rvec(ncoords);
-  rvec *vec = data->data.vector.rvec;
+  data->data.rvec = *guamps_init_gmx_rvec(ncoords);
+  rvec *vec = data->data.rvec.rvec;
 
 
   // parse values
@@ -261,7 +261,6 @@ int guamps_read_rvec(FILE *fh, gmx_data_t *data) {
     coord = lineno / ndims;
     dim   = lineno % ndims;
     vec[coord][dim] = val;
-    printf("%d\t%d\t%f\n", coord, dim, val);
     lineno += 1;
   }
 
