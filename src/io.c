@@ -215,3 +215,56 @@ static int guamps_read_vector_header(const char *name,
   }
 
 }
+
+/**
+   Read a vector data file.
+ */
+int guamps_read_rvec(FILE *fh, gmx_data_t *data) {
+
+  int ncells, ncoords, ndims;
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  // header values: ncells, ncoords, ndims
+  if (
+      !guamps_read_vector_header("ncells" , buffer, buffer_size, fh, "ncells: %d" , &ncells , 1)
+      ||
+      !guamps_read_vector_header("ncoords", buffer, buffer_size, fh, "ncoords: %d", &ncoords, 1)
+      ||
+      !guamps_read_vector_header("ndims"  , buffer, buffer_size, fh, "ndims: %d"  , &ndims  , 1))
+    { return false; }
+
+  // empty line
+  if (fgets(buffer, buffer_size, fh) == NULL) { perror("Error clearing empty line"); return false; }
+
+  // result value
+  data->type = RVEC_T;
+  data->data.vector = *guamps_init_gmx_rvec(ncoords);
+  rvec *vec = data->data.vector.rvec;
+
+
+  // parse values
+  int
+    lineno = 0,
+    coord  = 0,
+    dim    = 0;
+  float val;
+
+  while (!feof(fh)) {
+
+    fgets(buffer, buffer_size, fh);
+    if (sscanf(buffer, "%f", &val) != 1) {
+      guamps_error("Failed to parse value from value %d: '%s'\n", lineno+1, buffer);
+      return false;
+    }
+
+    coord = lineno / ndims;
+    dim   = lineno % ndims;
+    vec[coord][dim] = val;
+    printf("%d\t%d\t%f\n", coord, dim, val);
+    lineno += 1;
+  }
+
+  // success!
+  return true;
+}
