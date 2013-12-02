@@ -24,6 +24,9 @@ typedef enum type_e {
   RNG_T   // gmx RNG
 } type_t;
 
+static const char *GUAMPS_TYPE_NAMES[] =
+  {[RVEC_T]="RVEC_T", [INT_T]="INT_T", [RNG_T]="RNG_T"};
+
 // data payload
 typedef union data_u {
   gmx_rvec_t rvec  ;  // RVEC_T
@@ -40,6 +43,12 @@ typedef struct guamps_data_s {
 typedef enum selector_e {
   NATOMS, POSITIONS, VELOCITIES, FORCES, LAMBDA, BOX, STEP, TIME, RNG
 } selector_t;
+
+static const char *GUAMPS_SELECTOR_NAMES[] =
+  {[NATOMS]="NATOMS", [POSITIONS]="POSITIONS", [VELOCITIES]="VELOCITIES",
+   [FORCES]="FORCES", [LAMBDA]="LAMBDA", [BOX]="BOX", [STEP]="STEP", [TIME]="TIME",
+   [RNG]="RNG"
+  };
 
 typedef enum filetype_e {
   CPT, TPR
