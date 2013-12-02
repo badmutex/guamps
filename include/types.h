@@ -12,13 +12,24 @@ typedef struct gmx_rvec_s {
   int  natoms;
 } gmx_rvec_t;
 
+// used in the data
+typedef enum type_e {
+  RVEC_T, // gmx `rvec`
+  INT_T,  // numbers
+  RNG_T   // gmx RNG
+} type_t;
+
+// data payload
+typedef union data_u {
+  gmx_rvec_t rvec  ;  // RVEC_T
+  int        number;  // INT_T
+  gmx_rng_t  rng   ;  // RNG_T
+} data_t;
+
+// the ADT
 typedef struct guamps_data_s {
-  enum type_e { RVEC_T, INT_T, RNG_T } type;
-  union data_u {
-    gmx_rvec_t rvec  ;  // RVEC_T
-    int        number;  // INT_T
-    gmx_rng_t  rng   ;  // RNG_T
-  } data;
+  type_t type;
+  data_t data;
 } guamps_data_t;
 
 typedef enum selector_e {
@@ -30,5 +41,7 @@ typedef enum filetype_e {
 } filetype_t;
 
 gmx_rvec_t * guamps_init_gmx_rvec(int natoms);
+
+
 
 #endif
