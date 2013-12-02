@@ -268,6 +268,23 @@ int guamps_read_rvec(FILE *fh, guamps_data_t *data) {
   return true;
 }
 
+int guamps_read_int(FILE *fh, guamps_data_t *data) {
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  data->type = INT_T;
+  data->data.number = 0;
+
+  fgets(buffer, buffer_size, fh);
+  if (sscanf(buffer, "%d", &data->data.number) != 1) {
+    guamps_error("guamps_read_int: Failed to parse integer: '%s'\n", buffer);
+    return false;
+  }
+
+  return true;
+}
+
+
 int guamps_selector_type(const selector_t sel, type_t *type) {
   int retval = true;
   switch(sel) {
