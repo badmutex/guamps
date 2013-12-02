@@ -267,3 +267,31 @@ int guamps_read_rvec(FILE *fh, guamps_data_t *data) {
   // success!
   return true;
 }
+
+int guamps_selector_type(const selector_t sel, type_t *type) {
+  int retval = true;
+  switch(sel) {
+  case NATOMS:
+    *type = INT_T;
+    break;
+  case POSITIONS:
+    *type = RVEC_T;
+    break;
+  case VELOCITIES:
+    *type = RVEC_T;
+    break;
+  case FORCES:
+    *type = RVEC_T;
+    break;
+  case LAMBDA:
+    *type = INT_T;
+    break;
+  default:
+    guamps_error("Unknown type for selector value %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    retval = false;
+    break;
+  }
+
+  return retval;
+
+}
