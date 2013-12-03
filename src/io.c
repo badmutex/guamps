@@ -125,6 +125,11 @@ int guamps_write_scalar(FILE *fh, const guamps_data_t *data) {
 
 int guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
 
+  if(vec == NULL) {
+    guamps_error("cannot write NULL vector\n");
+    return false;
+  }
+
   const int
     ncells = 1,
     ncoords = length,
