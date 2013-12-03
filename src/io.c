@@ -163,42 +163,65 @@ int guamps_pick_filetype(const char *path, filetype_t *type) {
 
 }
 
-int guamps_read_tpr_X(const char *path, const selector_t sel, guamps_data_t *result) {
+int guamps_read_tpr_X(const char *path, const selector_t sel, guamps_data_t *res) {
 
-  t_inputrec ir;
-  t_state st;
-  rvec *forces;
-  gmx_mtop_t mtop;
+  tpr_t *tpr = guamps_load_tpr(path);
+  int ret = true;
 
-  init_inputrec(&ir);
-  init_state(&st, -1, -1, -1, -1);
-  init_mtop(&mtop);
-
-  // check to see if the forces can be read
-  t_tpxheader header;
-  int version, generation;
-  read_tpxheader(path, &header,
-		 FALSE, // runtime error on version mismatch
-		 &version, &generation);
-  if (!header.bF) {
-    forces = NULL;
-  } else {
-    snew(forces, header.natoms);
+  switch(sel) {
+  case NATOMS:
+    res->type       = INT_T;
+    res->data.v_int = tpr->natoms;
+    break;
+  case POSITIONS:
+    res->type               = RVEC_T;
+    res->data.v_rvec.rvec   = tpr->state.x;
+    res->data.v_rvec.natoms = tpr->natoms;
+    break;
+  case VELOCITIES:
+    res->type               = RVEC_T;
+    res->data.v_rvec.rvec   = tpr->state.v;
+    res->data.v_rvec.natoms = tpr->natoms;
+    break;
+  case FORCES:
+    res->type               = RVEC_T;
+    res->data.v_rvec.rvec   = tpr->f;
+    res->data.v_rvec.natoms = tpr->natoms;
+    break;
+  case LAMBDA:
+    res->type         = FLOAT_T;
+    res->data.v_float = tpr->state.lambda;
+    break;
+  case BOX:
+    res->type               = RVEC_T;
+    res->data.v_rvec.rvec   = (rvec *) tpr->state.box;
+    res->data.v_rvec.natoms = 3;
+    break;
+  case NSTLOG:
+    res->type       = INT_T;
+    res->data.v_int = tpr->inputrec.nstlog;
+    break;
+  case NSTXOUT:
+    res->type       = INT_T;
+    res->data.v_int = tpr->inputrec.nstxout;
+    break;
+  case NSTVOUT:
+    res->type       = INT_T;
+    res->data.v_int = tpr->inputrec.nstvout;
+    break;
+  case NSTFOUT:
+    res->type       = INT_T;
+    res->data.v_int = tpr->inputrec.nstfout;
+    break;
+  default:
+    guamps_error("guamps_read_tpr_X: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
+    ret = false;
+    break;
   }
 
-  // read the data
-  read_tpx_state(path, &ir, &st, forces, &mtop);
+  guamps_free_tpr(tpr);
 
-
-  // store the result
-  if (sel == FORCES && header.bF) {
-    result->type	     = RVEC_T;
-    result->data.v_rvec.rvec   = forces;
-    result->data.v_rvec.natoms = header.natoms;
-    return true;
-  } else {
-    return guamps_get_state_X(&st, sel, result);
-  }
+  return ret;
 
 }
 
