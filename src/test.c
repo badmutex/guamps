@@ -39,10 +39,28 @@ void test5() {
   gmx_bool bOK;
 
   t_fileio *fh = open_trn(trrpath, "r");
-  while (fread_trnheader(fh, &header, &bOK)){
-    pr_trnheader(stdout, 4, "my header", &header);
+
+    int step, natoms;
+    real t, lambda;
+    rvec *box, *x, *v, *f;
+
+
+  int frame = 0;
+  while(fread_trnheader(fh, &header, &bOK)) {
+    box = (rvec *)calloc(3, sizeof(rvec));
+    x   = (rvec *)calloc(header.natoms, sizeof(rvec));
+    v   = (rvec *)calloc(header.natoms, sizeof(rvec));
+    f   = (rvec *)calloc(header.natoms, sizeof(rvec));
+
+    // `fread_trn` doesn't work so use `fread_htrn` instead
+    if(fread_htrn(fh, &header, box, x, v, f)) {
+      printf("%5d %5d %10.2f %f\n", frame++, header.step, header.t, header.lambda);
+      guamps_write_rvec(stdout, f, header.natoms);
+    }
+
+    free(box);
+    free(x); free(v); free(f);
   }
-  
 
 }
 
@@ -231,6 +249,6 @@ void test0() {
 
 int main(int argc, char *argv[]) {
   set_program_name(argv[0]);
-  test6();
+  test5();
   return 0;
 }
