@@ -15,29 +15,35 @@ static const char *GUAMPS_TYPE_NAMES[] =  {
 typedef struct {
   int length;
   rvec *rvec;
-} rvec_t
+} rvec_t;
 
 typedef union {
   int v_int; float v_float; double v_double;
   rvec_t v_rvec;
-} value_t
+} value_t;
 
 typedef struct {
   type_t type;
   value_t value;
-} data_t
+} data_t;
 
 
 typedef enum {
-  TPR_K, CPT_K, TRR_K
-} selkind_t;
+  TPR_F, CPT_F, TRR_F
+} filetype_t;
 
-static const char *GUAMPS_SELKIND_NAMES[] = {
-  [TPR_T]="TPR_T", [CPT_T]="CPT_T", [TRR_T]="TRR_T"
-}
+static const char *GUAMPS_FILETYPE_NAMES[] = {
+  [TPR_F]="TPR_F", [CPT_F]="CPT_F", [TRR_F]="TRR_F"
+};
+
+typedef union {
+  tpr_t p_tpr;
+  cpt_t p_cpt;
+  trr_t p_trr;
+} payload_t;
 
 typedef struct {
-  selkind_t kind;
+  filetype_t kind;
   payload_t data;
 } selectable_t;
 

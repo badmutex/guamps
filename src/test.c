@@ -12,6 +12,7 @@
 #include "gromacs/smalloc.h"
 
 
+
 /*
   Test loading tpr
  */
@@ -249,6 +250,6 @@ void test0() {
 
 int main(int argc, char *argv[]) {
   set_program_name(argv[0]);
-  test5();
+  test7();
   return 0;
 }

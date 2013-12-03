@@ -1,8 +1,9 @@
+#include "guampsio.h"
+#include "gmxutil.h"
+
 #include "stdio.h"
 #include "stdbool.h"
 
-#include "io.h"
-#include "gmxutil.h"
 
 int init_gmx(){
   gmx_init_params_t gmx_params;
@@ -19,40 +20,16 @@ int main(int argc, char *argv[]){
   const char *path   = argv[1];
   const char *selstr = argv[2];
 
-  guamps_data_t r;
+  data_t r;
   selector_t selector;
   if (!guamps_pick_selector(selstr, &selector)) {
     fprintf(stderr, "Unknown selection: %s\n", selstr);
     return 1;
   }
 
-
-  // read and select
-  filetype_t ftype;
-  guamps_pick_filetype(path, &ftype);
-
-  int ok = false;
-  switch (ftype) {
-  case CPT:
-    ok = guamps_read_checkpoint_X(path, selector, &r);
-    break;
-  case TPR:
-    ok = guamps_read_tpr_X(path, selector, &r);
-    break;
-  default:
-    fprintf(stderr, "Unable to read: %s\n", path);
-    break;
-  }
-
-
-  // write result
-  if (ok) {
-    guamps_write(stdout, &r);
-    return 0;
-  } else {
-    fprintf(stderr, "Something went wrong :(\n");
-    return 1;
-  }
-
+  data_t data;
+  selectable_t *sel = guamps_load(path);
+  guamps_select(sel, selector, &data);
+  guamps_write(stdout, &data);
 
 }

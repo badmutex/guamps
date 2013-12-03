@@ -3,6 +3,8 @@
 
 #include "gromacs/types/inputrec.h"
 #include "gromacs/types/state.h"
+#include "gromacs/types/commrec.h"
+#include "gromacs/trnio.h"
 
 typedef struct {
   t_commrec *commrec;
@@ -19,9 +21,15 @@ typedef struct {
 } tpr_t;
 
 typedef struct {
-  t_trnheader *header;
-  matrix *box;
+  t_trnheader header;
+  matrix box;
   rvec *x, *v, *f;
 } trr_t;
+
+tpr_t * guamps_init_tpr(const int natoms);
+void guamps_free_tpr(tpr_t *tpr);
+
+trr_t * guamps_init_trr(const int natoms);
+void guamps_free_trr(trr_t *trr);
 
 #endif

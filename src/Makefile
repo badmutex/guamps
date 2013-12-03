@@ -1,10 +1,11 @@
 
 include ../Makefile.config
 
-libnames = io gmxutil types
+libnames = guampsio gmx_t gmxutil output
+# guampsio gmxutil types
 libobjs = $(addsuffix .o, ${libnames})
 
-prognames = get set test
+prognames = get set test2
 progobjs = $(addsuffix .o, ${prognames})
 
 allobjs = $(join ${libobjs}, ${progobjs})
@@ -22,7 +23,7 @@ set : ${libobjs} set.o
 	${cc} ${ldflags} $^ -o $@
 
 
-test : ${libobjs} test.o
+test2 : ${libobjs} test2.o
 	${cc} ${ldflags} $^ -o $@
 
 

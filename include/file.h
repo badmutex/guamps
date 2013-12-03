@@ -6,7 +6,7 @@ typedef enum {
 } file_t;
 
 
-file_t *fopen(const char *path, const char *mode);
-int     fclose(file_t *fh);
+file_t *guamps_fopen(const char *path, const char *mode);
+int     guamps_fclose(file_t *fh);
 
 #endif
