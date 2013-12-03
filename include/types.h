@@ -33,17 +33,21 @@ void guamps_free_tpr(tpr_t *);
 typedef enum type_e {
   RVEC_T, // gmx `rvec`
   INT_T,  // numbers
-  RNG_T   // gmx RNG
+  RNG_T,  // gmx RNG
+  FLOAT_T // float
 } type_t;
 
 static const char *GUAMPS_TYPE_NAMES[] =
-  {[RVEC_T]="RVEC_T", [INT_T]="INT_T", [RNG_T]="RNG_T"};
+  {[RVEC_T]="RVEC_T", [INT_T]="INT_T", [RNG_T]="RNG_T",
+   [FLOAT_T]="FLOAT_T"
+  };
 
 // data payload
 typedef union data_u {
-  gmx_rvec_t rvec  ;  // RVEC_T
-  int        number;  // INT_T
-  gmx_rng_t  rng   ;  // RNG_T
+  gmx_rvec_t v_rvec  ;  // RVEC_T
+  int        v_int   ;  // INT_T
+  gmx_rng_t  v_rng   ;  // RNG_T
+  float      v_float ;  // FLOAT_T
 } data_t;
 
 // the ADT
@@ -53,13 +57,15 @@ typedef struct guamps_data_s {
 } guamps_data_t;
 
 typedef enum selector_e {
-  NATOMS, POSITIONS, VELOCITIES, FORCES, LAMBDA, BOX, STEP, TIME, RNG
+  NATOMS, POSITIONS, VELOCITIES,
+  FORCES, LAMBDA, BOX, STEP, TIME,
+  RNG, NSTLOG, NSTXOUT, NSTVOUT, NSTFOUT
 } selector_t;
 
 static const char *GUAMPS_SELECTOR_NAMES[] =
   {[NATOMS]="NATOMS", [POSITIONS]="POSITIONS", [VELOCITIES]="VELOCITIES",
    [FORCES]="FORCES", [LAMBDA]="LAMBDA", [BOX]="BOX", [STEP]="STEP", [TIME]="TIME",
-   [RNG]="RNG"
+   [RNG]="RNG", [NSTLOG]="NSTLOG", [NSTXOUT]="NSTXOUT", [NSTVOUT]="NSTVOUT", [NSTFOUT]="NSTFOUT",
   };
 
 typedef enum filetype_e {

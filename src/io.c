@@ -23,6 +23,11 @@ int guamps_pick_selector(const char *str, selector_t *sel) {
     *sel = STEP; }
   else if (0 == strcmp(str, "time")) {
     *sel = TIME; }
+  // RNG not supported
+  else if (0 == strcmp(str, "nstlog")) { *sel = NSTLOG; }
+  else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
+  else if (0 == strcmp(str, "nstvout")){ *sel = NSTVOUT; }
+  else if (0 == strcmp(str, "nstfout")){ *sel = NSTFOUT; }
   else {
     return false;
   }
@@ -44,52 +49,78 @@ int guamps_read_checkpoint_X(const char *path, const selector_t selector, guamps
 
 int guamps_get_state_X(const t_state *st, const selector_t sel, guamps_data_t *result) {
 
+  int ret = true;
+
   switch (sel) {
   case NATOMS:
     result->type        = INT_T;
-    result->data.number = st->natoms;
-    return true;
+    result->data.v_int = st->natoms;
     break;
   case POSITIONS:
     result->type	     = RVEC_T;
-    result->data.rvec.rvec   = st->x;
-    result->data.rvec.natoms = st->natoms;
-    return true;
+    result->data.v_rvec.rvec   = st->x;
+    result->data.v_rvec.natoms = st->natoms;
     break;
   case VELOCITIES:
     result->type             = RVEC_T;
-    result->data.rvec.rvec   = st->v;
-    result->data.rvec.natoms = st->natoms;
-    return true;
+    result->data.v_rvec.rvec   = st->v;
+    result->data.v_rvec.natoms = st->natoms;
     break;
-  case RNG:
-    guamps_error("guamps_get_state_X: Getting RNG state from GMX t_state is not supported\n");
-    return false;
+  // forces not stored in t_state
+  case LAMBDA:
+    result->type         = FLOAT_T;
+    result->data.v_float = st->lambda;
     break;
+  case BOX:
+    result->type = RVEC_T;
+    result->data.v_rvec.rvec = (rvec *)st->box;
+    result->data.v_rvec.natoms = 3;
+    break;
+  // step not stored in t_state
+  // time not stored in t_state
+  // rng access is buggy, so don't support it
   default:
-    return false;
+    guamps_error("guamps_get_state_X: Getting %s field from GMX t_state is not supported\n",
+		 GUAMPS_SELECTOR_NAMES[sel]);
+    ret = false;
     break;
   }
+
+  return ret;
 
 }
 
 int guamps_write(FILE *fh, const guamps_data_t *data) {
   switch(data->type) {
   case RVEC_T:
-    return guamps_write_rvec(fh, data->data.rvec.rvec, data->data.rvec.natoms);
+    return guamps_write_rvec(fh, data->data.v_rvec.rvec, data->data.v_rvec.natoms);
     break;
   case INT_T:
-    return guamps_write_int(fh, data->data.number);
+    return guamps_write_scalar(fh, data);
     break;
+  case FLOAT_T:
+    return guamps_write_scalar(fh, data);
   default:
+    guamps_error("guamps_write: unknown type %s\n", GUAMPS_TYPE_NAMES[data->type]);
     return false;
     break;
   }
   return true;
 }
 
-int guamps_write_int(FILE *fh, const int i){
-  return fprintf(fh, "%d\n", i);
+int guamps_write_scalar(FILE *fh, const guamps_data_t *data) {
+  char *fmt;
+  switch(data->type) {
+  case INT_T:
+    fprintf(fh, "%d\n", data->data.v_int); break;
+  case FLOAT_T:
+    fprintf(fh, "%f\n", data->data.v_float); break;
+  default:
+    guamps_error("guamps_write_scalar: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[data->type]);
+    return false;
+    break;
+  }
+  return true;
 }
 
 int guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
@@ -162,8 +193,8 @@ int guamps_read_tpr_X(const char *path, const selector_t sel, guamps_data_t *res
   // store the result
   if (sel == FORCES && header.bF) {
     result->type	     = RVEC_T;
-    result->data.rvec.rvec   = forces;
-    result->data.rvec.natoms = header.natoms;
+    result->data.v_rvec.rvec   = forces;
+    result->data.v_rvec.natoms = header.natoms;
     return true;
   } else {
     return guamps_get_state_X(&st, sel, result);
@@ -243,8 +274,8 @@ int guamps_read_rvec(FILE *fh, guamps_data_t *data) {
 
   // result value
   data->type = RVEC_T;
-  data->data.rvec = *guamps_init_gmx_rvec(ncoords);
-  rvec *vec = data->data.rvec.rvec;
+  data->data.v_rvec = *guamps_init_gmx_rvec(ncoords);
+  rvec *vec = data->data.v_rvec.rvec;
 
 
   // parse values
@@ -277,10 +308,10 @@ int guamps_read_int(FILE *fh, guamps_data_t *data) {
   char buffer[buffer_size];
 
   data->type = INT_T;
-  data->data.number = 0;
+  data->data.v_int = 0;
 
   fgets(buffer, buffer_size, fh);
-  if (sscanf(buffer, "%d", &data->data.number) != 1) {
+  if (sscanf(buffer, "%d", &data->data.v_int) != 1) {
     guamps_error("guamps_read_int: Failed to parse integer: '%s'\n", buffer);
     return false;
   }
