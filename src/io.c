@@ -3,6 +3,7 @@
 #include "io.h"
 
 #include "gromacs/smalloc.h"
+#include "gromacs/trnio.h"
 
 
 int guamps_pick_selector(const char *str, selector_t *sel) {
@@ -332,4 +333,44 @@ int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data) {
     guamps_error("guamps_read: I don't know how to read files of type %s\n", GUAMPS_TYPE_NAMES[type]);
     return false;
   }
+}
+
+
+int guamps_read_trr_X(const char *path, const unsigned int frame, const selector_t sel, guamps_data_t *result) {
+
+  t_fileio *fh = open_trn(path, "r");
+
+  t_trnheader h;
+  gmx_bool bOK;
+  fread_trnheader(fh, &h, &bOK);
+
+  return true;
+
+}
+
+
+tpr_t *  guamps_load_tpr(const char *path) {
+  tpr_t *tpr;
+
+  // read the header to get natoms for initializing tpr_t
+  t_tpxheader h;
+  int ver, gen;
+  read_tpxheader(path, &h, FALSE, &ver, &gen);
+  tpr = guamps_init_tpr(h.natoms);
+
+  // set forces to null if header indicates their absence, else segfault
+  if (h.bF == 0) {tpr->f = NULL;}
+
+  // don't use `read_tpx` b/c there isn't a corresponding `write_tpx`
+  // function in the GMX tpxio.h api
+  read_tpx_state(path,
+		 &tpr->inputrec, &tpr->state, tpr->f,
+		 &tpr->mtop);
+
+  return tpr;
+}
+
+
+void guamps_save_tpr(const char *path, tpr_t *tpr) {
+  write_tpx_state(path, &tpr->inputrec, &tpr->state, &tpr->mtop);
 }

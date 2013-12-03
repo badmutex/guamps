@@ -21,6 +21,12 @@ int guamps_read_rvec(FILE *fh, guamps_data_t *data);
 int guamps_selector_type(const selector_t sel, type_t *type);
 int guamps_read_int(FILE *fh, guamps_data_t *data);
 int guamps_read(FILE *fh, const selector_t sel, guamps_data_t *data);
+tpr_t * guamps_load_tpr(const char *path);
+
+void guamps_save_tpr(const char *path, tpr_t *tpr);
+
+int guamps_read_trr_X(const char *path, const unsigned int frame, const selector_t sel, guamps_data_t *result);
+
 
 
 #endif

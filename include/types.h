@@ -17,6 +17,18 @@ typedef struct gmx_rvec_s {
  */
 gmx_rvec_t * guamps_init_gmx_rvec(int natoms);
 
+// hold the state of a tpr
+typedef struct gmx_tpr_s {
+  int        natoms;
+  t_inputrec inputrec;
+  t_state    state;
+  rvec      *f;
+  gmx_mtop_t mtop;
+} tpr_t;
+
+tpr_t * guamps_init_tpr(const int natoms);
+void guamps_free_tpr(tpr_t *);
+
 // used in the data
 typedef enum type_e {
   RVEC_T, // gmx `rvec`

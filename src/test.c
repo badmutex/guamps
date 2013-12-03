@@ -1,3 +1,5 @@
+#include "io.h"
+
 #include "stdio.h"
 
 #include "gromacs/types/state.h"
@@ -6,8 +8,43 @@
 #include "gromacs/gmxfio.h"
 #include "gromacs/statutil.h"
 #include "gromacs/tpxio.h"
+#include "gromacs/trnio.h"
 #include "gromacs/smalloc.h"
 
+
+/*
+  Test loading tpr
+ */
+void test6() {
+  const char *path = "../topol.tpr";
+  tpr_t *tpr = guamps_load_tpr(path);
+
+  tpr->inputrec.nstxout = 100;
+  tpr->inputrec.nstvout = 100;
+  tpr->inputrec.nstfout = 100;
+  tpr->inputrec.nstxtcout = 0;
+  printf("%d\n", tpr->inputrec.nstxout);
+  guamps_save_tpr("../topol2.tpr", tpr);
+  guamps_free_tpr(tpr);
+}
+
+/*
+  Test traj functions
+ */
+void test5() {
+
+  const char *trrpath = "../sim/traj.trr";
+
+  t_trnheader header;
+  gmx_bool bOK;
+
+  t_fileio *fh = open_trn(trrpath, "r");
+  while (fread_trnheader(fh, &header, &bOK)){
+    pr_trnheader(stdout, 4, "my header", &header);
+  }
+  
+
+}
 
 /*
   Show that /read_checkpoint_state/ does not read in the state of the RNG
@@ -194,6 +231,6 @@ void test0() {
 
 int main(int argc, char *argv[]) {
   set_program_name(argv[0]);
-  test4();
+  test6();
   return 0;
 }
