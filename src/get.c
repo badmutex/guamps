@@ -28,8 +28,16 @@ int main(int argc, char *argv[]){
   }
 
   data_t data;
-  selectable_t *sel = guamps_load(path);
-  guamps_select(sel, selector, &data);
+  selectable_t *sel;
+
+  if(!(sel = guamps_load(path))) {
+    guamps_error("%s: failed to load %s\n", argv[0], path);
+    return 1;
+  }
+  if(!guamps_select(sel, selector, &data)){
+    guamps_error("%s: failed to select %s\n", argv[0], GUAMPS_SELECTOR_NAMES);
+    return 1;
+  }
   guamps_write(stdout, &data);
 
 }
