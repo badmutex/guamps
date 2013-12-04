@@ -7,9 +7,9 @@
 #include "gromacs/trnio.h"
 
 typedef struct {
-  t_commrec *commrec;
-  t_inputrec *inputrec;
-  t_state *state;
+  t_commrec  commrec;
+  t_inputrec inputrec;
+  t_state    state;
 } cpt_t;
 
 typedef struct {

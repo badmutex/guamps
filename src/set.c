@@ -1,21 +1,19 @@
+#include "guampsio.h"
+#include "gmxutil.h"
+
+
 #include "stdio.h"
 #include "stdbool.h"
 
-#include "io.h"
-#include "gmxutil.h"
 
 int init_gmx(){
   gmx_init_params_t gmx_params;
-  gmx_params.program_name = "guamps_has";
+  gmx_params.program_name = "guamps_set";
   return guamps_init_gromacs(&gmx_params);
 }
 
 
 int main(int argc, char *argv[]) {
-
-  // for return code checking
-  int ok = true;
-
   if (!init_gmx()) {
     fprintf(stderr, "Unable to initialize GROMACS\n");
     return 1;
@@ -26,26 +24,17 @@ int main(int argc, char *argv[]) {
     *selstr  = argv[2],
     *datpath = argv[3];
 
-  guamps_data_t r;
-  selector_t selector;
-  if (!guamps_pick_selector(selstr, &selector)) {
-    fprintf(stderr, "Unknown selection: %s\n", selstr);
-    return 1;
-  }
+  data_t data;
+  selector_t sel;
+  selectable_t *obj;
 
-  // read and select
-  filetype_t ftype;
-  guamps_pick_filetype(path, &ftype);
+  obj = guamps_load(path);
+  guamps_pick_selector(selstr, &sel);
 
-  // read the data
-  FILE *fh;
-  if (!(fh = fopen(datpath, "r"))) { guamps_error("Failed to open: %s\n", datpath); return 1;}
-  if (!guamps_read(fh, selector, &r)) { return 1; }
+  FILE *fh = fopen(datpath, "r");
+  guamps_fread(fh, RVEC_T, &data);
   fclose(fh);
-
-  // debugging
-  guamps_write(stdout, &r);
-
-
+  guamps_update(obj, sel, &data);
+  guamps_write(path, obj);
 
 }

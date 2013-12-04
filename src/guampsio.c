@@ -78,6 +78,131 @@ trr_t * guamps_load_trr(const char *path) {
 }
 
 /* *********************************************************************
+   Reading GUAMPS data
+ ***********************************************************************/
+bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
+
+  data->type = type;
+
+  switch(type) {
+  case INT_T:
+    return guamps_fread_scalar(fh, "%d", &data->value.v_int);
+    break;
+  case LLINT_T:
+    return guamps_fread_scalar(fh, "%lld", &data->value.v_llint);
+    break;
+  case FLOAT_T:
+    return guamps_fread_scalar(fh, "%f", &data->value.v_float);
+    break;
+  case DOUBLE_T:
+    return guamps_fread_scalar(fh, "%f", &data->value.v_double);
+    break;
+  case RVEC_T:
+    return guamps_fread_rvec(fh, &data->value.v_rvec);
+    break;
+  }
+
+  return true;
+
+}
+
+bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  fgets(buffer, buffer_size, fh);
+  if(scanf(buffer, spec, value) != 1) {
+    guamps_error("guamps_fread_int: failed to parse int: '%s'\n", buffer);
+    return false;
+  }
+  return true;
+}
+
+
+/**
+   Read the header of a vector file.
+
+   Use `fgets` to read `size` bytes from `stream` into `buffer` and
+   call `sscanf` to parse `expected` values given in `fmt` from `buffer` to `dst`
+
+   @param name: the name of this portion of header for the error message on failure
+   @param buffer: where to store the data
+   @param size: buffer size
+   @param stream: the file handle to read from
+   @param fmt: format to parse
+   @param dst: store parsed result here
+   @param expected: expected number of parsed values (currently must be 1)
+   @return `true` for success, `false` otherwise` after printing message to stderr
+ */
+static int guamps_read_vector_header(const char *name,
+				           char *buffer,
+				     const int   size,
+				           FILE *stream,
+				     const char *fmt,
+				           void *dst,
+				     const int   expected) {
+
+  if(fgets(buffer, size, stream) == NULL){
+    guamps_error("guamps_read_vector_header: Error reading '%s' from header\n", name);
+    return false;
+  } else if (sscanf(buffer, fmt, dst) != expected) {
+    guamps_error("guamps_read_vector_header: Error parsing header '%s' for %d values from string: '%s'\n", name, expected, buffer);
+    return false;
+  } else {
+    return true;
+  }
+
+}
+
+bool guamps_fread_rvec(FILE *fh, rvec_t *value) {
+
+  int ncells, ncoords, ndims;
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  // header values: ncells, ncoords, ndims
+  if (
+      !guamps_read_vector_header("ncells" , buffer, buffer_size, fh, "ncells: %d" , &ncells , 1)
+      ||
+      !guamps_read_vector_header("ncoords", buffer, buffer_size, fh, "ncoords: %d", &ncoords, 1)
+      ||
+      !guamps_read_vector_header("ndims"  , buffer, buffer_size, fh, "ndims: %d"  , &ndims  , 1))
+    { return false; }
+
+  // empty line
+  if (fgets(buffer, buffer_size, fh) == NULL) { perror("Error clearing empty line"); return false; }
+
+  // result value
+  value->length = ncoords;
+  value->rvec   = (rvec *)calloc(ncoords, sizeof(rvec));
+  rvec *vec = value->rvec;
+
+
+  // parse values
+  int
+    lineno = 0,
+    coord  = 0,
+    dim    = 0;
+  float val;
+
+  while (!feof(fh)) {
+
+    fgets(buffer, buffer_size, fh);
+    if (sscanf(buffer, "%f", &val) != 1) {
+      guamps_error("guamps_fread_rvec: Failed to parse value from value %d: '%s'\n", lineno+1, buffer);
+      return false;
+    }
+
+    coord = lineno / ndims;
+    dim   = lineno % ndims;
+    vec[coord][dim] = val;
+    lineno += 1;
+  }
+
+  return true;
+}
+
+/* *********************************************************************
    Extracting data
  ***********************************************************************/
 bool guamps_select    (const selectable_t *data, const selector_t sel, data_t *res) {
@@ -215,18 +340,98 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
 }
 
 /* *********************************************************************
+   Updates
+ ***********************************************************************/
+bool guamps_update(selectable_t *obj, const selector_t sel, const data_t *new) {
+  switch(obj->kind) {
+  case TPR_F:
+    return guamps_update_tpr(&obj->data.p_tpr, sel, new);
+    break;
+  default:
+    guamps_error("guamps_update: I don't know how to update %s\n", GUAMPS_FILETYPE_NAMES[obj->kind]);
+    return false;
+  }
+}
+
+bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
+
+  switch(sel) {
+  case POSITIONS:
+    if(!typecheck(RVEC_T,new->type)) return false;
+    tpr->state.x = new->value.v_rvec.rvec;
+    break;
+  case VELOCITIES:
+    if(!typecheck(RVEC_T,new->type)) return false;
+    tpr->state.v = new->value.v_rvec.rvec;
+    break;
+  case FORCES:
+    if (!typecheck(RVEC_T, new->type)) return false;
+    tpr->f = new->value.v_rvec.rvec;
+    break;
+  case LAMBDA:
+    if(!typecheck(FLOAT_T, new->type)) return false;
+    tpr->state.lambda = new->value.v_float;
+    break;
+  case STEP:
+    if(!typecheck(LLINT_T, new->type)) return false;
+    tpr->inputrec.init_step = new->value.v_llint;
+    break;
+  case TIME:
+    if(!typecheck(DOUBLE_T, new->type)) return false;
+    tpr->inputrec.init_t = new->value.v_double;
+    break;
+  case SEED:
+    if(!typecheck(INT_T, new->type)) return false;
+    tpr->inputrec.ld_seed = new->value.v_int;
+    break;
+  case NSTLOG:
+    if(!typecheck(INT_T, new->type)) return false;
+    tpr->inputrec.nstlog = new->value.v_int;
+    break;
+  case NSTXOUT:
+    if(!typecheck(INT_T, new->type)) return false;
+    tpr->inputrec.nstxout = new->value.v_int;
+    break;
+  case NSTVOUT:
+    if(!typecheck(INT_T, new->type)) return false;
+    tpr->inputrec.nstlog = new->value.v_int;
+    break;
+  case NSTFOUT:
+    if(!typecheck(INT_T, new->type)) return false;
+    tpr->inputrec.nstlog = new->value.v_int;
+    break;
+  }
+
+  return true;
+}
+
+
+/* *********************************************************************
    Writing to files
  ***********************************************************************/
-bool guamps_write(FILE *fh, const data_t *data) {
+bool guamps_write(const char *path, const selectable_t *obj) {
+
+  switch(obj->kind) {
+  case TPR_F:
+    return guamps_write_tpr(path, &obj->data.p_tpr);
+    break;
+  default:
+    guamps_error("guamps_write: I don't know how to write a %s file\n", GUAMPS_FILETYPE_NAMES[obj->kind]);
+    return false;
+  }
+
+}
+
+bool guamps_fwrite(FILE *fh, const data_t *data) {
   switch(data->type) {
   case RVEC_T:
-    return guamps_write_rvec(fh, data->value.v_rvec.rvec, data->value.v_rvec.length);
+    return guamps_fwrite_rvec(fh, data->value.v_rvec.rvec, data->value.v_rvec.length);
     break;
   case INT_T:
-    return guamps_write_scalar(fh, data);
+    return guamps_fwrite_scalar(fh, data);
     break;
   case FLOAT_T:
-    return guamps_write_scalar(fh, data);
+    return guamps_fwrite_scalar(fh, data);
   default:
     guamps_error("guamps_write: unknown type %s\n", GUAMPS_TYPE_NAMES[data->type]);
     return false;
@@ -235,10 +440,22 @@ bool guamps_write(FILE *fh, const data_t *data) {
   return true;
 }
 
-bool guamps_write_tpr(const char *path, const tpr_t *tpr); // TODO
+bool guamps_write_tpr(const char *path, const tpr_t *tpr) {
+
+  // casting to ignore the `const` qualifier
+  tpr_t *t = (tpr_t *)tpr;
+
+  write_tpx_state(path,
+		  &t->inputrec,
+		  &t->state,
+		  &t->mtop);
+
+  return true;
+}
+
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
 
-bool guamps_write_scalar(FILE *fh, const data_t *data) {
+bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
   char *fmt;
   switch(data->type) {
   case INT_T:
@@ -253,7 +470,7 @@ bool guamps_write_scalar(FILE *fh, const data_t *data) {
   return true;
 }
 
-bool guamps_write_rvec(FILE *fh, const rvec *vec, const int length) {
+bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
 
   if(vec == NULL) {
     guamps_error("cannot write NULL vector\n");

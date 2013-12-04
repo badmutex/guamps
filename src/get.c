@@ -38,6 +38,6 @@ int main(int argc, char *argv[]){
     guamps_error("%s: failed to select %s\n", argv[0], GUAMPS_SELECTOR_NAMES);
     return 1;
   }
-  guamps_write(stdout, &data);
+  guamps_fwrite(stdout, &data);
 
 }
