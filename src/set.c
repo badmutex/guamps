@@ -32,9 +32,20 @@ int main(int argc, char *argv[]) {
   guamps_pick_selector(selstr, &sel);
 
   FILE *fh = fopen(datpath, "r");
-  guamps_fread(fh, RVEC_T, &data);
+  if(!guamps_fread(fh, RVEC_T, &data)){
+    guamps_error("Cannot read data file %s\n", datpath);
+    return 1;
+  }
   fclose(fh);
-  guamps_update(obj, sel, &data);
-  guamps_write(path, obj);
+
+  if(!guamps_update(obj, sel, &data)){
+    guamps_error("Cannot update %s with new values\n", GUAMPS_FILETYPE_NAMES[obj->kind]);
+    return 1;
+  }
+
+  if(!guamps_write(path, obj)){
+    guamps_error("Cannot write %s\n", path);
+    return 1;
+  }
 
 }
