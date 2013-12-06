@@ -6,7 +6,7 @@ void test0() {
   tpr_t *tpr = guamps_load_tpr("topol.tpr");
   data_t res;
   guamps_select_tpr(tpr, LAMBDA, &res);
-  guamps_write_data(stdout, &res);
+  guamps_fwrite(stdout, &res);
 }
 
 int main(int argc, char *argv[]) {
