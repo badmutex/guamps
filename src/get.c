@@ -18,7 +18,7 @@ typedef struct {
 static struct option options[] = {
   {"file",   required_argument, 0,  'f' },
   {"select", required_argument, 0,  's' },
-  {"output", required_argument, 0,  'o' },
+  {"output", optional_argument, 0,  'o' },
 };
 
 void print_usage(FILE *stream, char *progname) {
@@ -127,8 +127,7 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  FILE *fh = output_file_fopen(args->output, "w");
+  FILE *fh = args_file_fopen(args->output, "w");
   guamps_fwrite(fh, &data);
-  output_file_close(args->output);
 
 }

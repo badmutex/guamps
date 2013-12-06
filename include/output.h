@@ -12,9 +12,9 @@ typedef struct {
 } args_file_t;
 
 void guamps_error(const char *str, ...);
+void guamps_warn(const char *str, ...);
 
-FILE * output_file_fopen(args_file_t *f, char *mode);
-void output_file_close(args_file_t *f);
+FILE * args_file_fopen(args_file_t *f, char *mode);
 
 void fprint_enum(const char *names[], const size_t count, const int indent, FILE *stream);
 

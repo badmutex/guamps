@@ -6,20 +6,34 @@
 #include "stdarg.h"
 #include <ctype.h>
 
-void guamps_error(const char *str, ...) {
-  const char *extra = "[GUAMPS] ";
-  char *msg = (char *) calloc (strlen(extra) + strlen(str), sizeof(char));
+static void vguamps_msg_output(const char *name, const char *str, va_list args) {
+  const char *extra = "[GUAMPS]";
+  char *msg = (char *) calloc (strlen(extra) + strlen(name) + 3 +strlen(str), sizeof(char));
   strcat(msg, extra);
+  strcat(msg, " ");
+  strcat(msg, name);
+  strcat(msg, ": ");
   strcat(msg, str);
 
-  va_list args;
-  va_start(args, str);
   vfprintf(stderr, msg, args);
-  va_end(args);
   free(msg);
 }
 
-FILE * output_file_fopen(args_file_t *f, char *mode) {
+void guamps_error(const char *str, ...) {
+  va_list args;
+  va_start(args, str);
+  vguamps_msg_output("ERROR", str, args);
+  va_end(args);
+}
+
+void guamps_warn(const char *str, ...) {
+  va_list args;
+  va_start(args, str);
+  vguamps_msg_output("WARNING", str, args);
+  va_end(args);
+}
+
+FILE * args_file_fopen(args_file_t *f, char *mode) {
   FILE *fh;
   switch(f->type) {
   case FILETYPE_PATH:
@@ -32,11 +46,6 @@ FILE * output_file_fopen(args_file_t *f, char *mode) {
     fh = f->file.handle;
   }
   return fh;
-}
-
-void output_file_close(args_file_t *f) {
-  if(f->should_close && f->file.handle)
-    fclose(f->file.handle);
 }
 
 void fprint_enum(const char *names[], const size_t count, const int indent, FILE *stream) {

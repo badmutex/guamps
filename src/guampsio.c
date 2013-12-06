@@ -445,6 +445,11 @@ bool guamps_write_tpr(const char *path, const tpr_t *tpr) {
   // casting to ignore the `const` qualifier
   tpr_t *t = (tpr_t *)tpr;
 
+  // gmx doesn't store forces in the tpr
+  if(t->f) {
+    guamps_warn("Forces not stored in TPR\n");
+  }
+
   write_tpx_state(path,
 		  &t->inputrec,
 		  &t->state,
