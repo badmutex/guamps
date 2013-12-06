@@ -1,9 +1,12 @@
 #include "guampsio.h"
 #include "gmxutil.h"
+#include "output.h"
 
 #include "stdio.h"
 #include "stdbool.h"
-
+#include <getopt.h>
+#include <ctype.h>
+#include <string.h>
 
 int init_gmx(){
   gmx_init_params_t gmx_params;
@@ -11,33 +14,126 @@ int init_gmx(){
   return guamps_init_gromacs(&gmx_params);
 }
 
+typedef struct {
+  char *file;
+  char *select;
+  args_file_t *output;
+} arguments_t;
+
+static struct option options[] = {
+  {"file",   required_argument, 0,  'f' },
+  {"select", required_argument, 0,  's' },
+  {"output", required_argument, 0,  'o' },
+};
+
+void print_usage(FILE *stream, char *progname) {
+
+  // Usage
+  fprintf(stream,
+	  "Usage: %s -f/--file FILE -s/--select STR [-o/--output FILE]\n", progname);
+
+  // -f/--file
+  fprintf(stream,
+	  "    -f  --file FILE           Read from this file\n");
+
+  // -s/--select
+  fprintf(stream,
+	  "    -s  --select              Select this from the FILE. Options are:\n"
+	  );
+  fprint_enum(GUAMPS_SELECTOR_NAMES, selector_t_count, 35, stream);
+
+  // -o/--output
+  fprintf(stream,
+	  "    -o  --output FILE         Optional. If given, write the output to this file.\n");
+
+  // -h/--help
+  fprintf(stream,
+	  "    -h  --help                Print this usage text\n");
+
+}
+
+
+arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
+
+  arguments_t *args = (arguments_t *)malloc(sizeof(arguments_t));
+  args->output = (args_file_t *)malloc(sizeof(args_file_t));
+
+  /* defaults */
+  args->output->type = FILETYPE_FILE;
+  args->output->file.handle = stdout;
+
+  /* parse */
+  while (true) {
+
+    int option_index = 0;
+    int c = getopt_long(argc, argv, "f:s:o:h?", options, &option_index);
+
+    if(c == -1) break;
+
+    switch(c) {
+    case 'f':
+      args->file = (char *)malloc(strlen(optarg)*sizeof(char));
+      strcpy(args->file, optarg);
+      break;
+    case 's':
+      args->select = (char *)malloc(strlen(optarg)*sizeof(char));
+      strcpy(args->select, optarg);
+      break;
+    case 'o':
+      args->output->type = FILETYPE_PATH;
+      args->output->file.path = (char *)malloc(strlen(optarg)*sizeof(char));
+      strcpy(args->output->file.path, optarg);
+      break;
+
+    case 'h':
+    case '?':
+    default:
+      print_usage(stderr, argv[0]);
+      return NULL;
+    }
+  }
+
+  return args;
+
+}
+
+
 int main(int argc, char *argv[]){
+
+  const char *progname = argv[0];
+
+  arguments_t *args = parse_opts(argc, argv, options);
+  if(args == NULL) {
+    return 1;
+  }
+
   if (!init_gmx()) {
     fprintf(stderr, "Unable to initialize GROMACS\n");
     return 1;
   }
 
-  const char *path   = argv[1];
-  const char *selstr = argv[2];
-
   data_t r;
   selector_t selector;
-  if (!guamps_pick_selector(selstr, &selector)) {
-    fprintf(stderr, "Unknown selection: %s\n", selstr);
+
+  if (!guamps_pick_selector(args->select, &selector)) {
+    fprintf(stderr, "Unknown selection: %s\n", args->select);
     return 1;
   }
 
   data_t data;
   selectable_t *sel;
 
-  if(!(sel = guamps_load(path))) {
-    guamps_error("%s: failed to load %s\n", argv[0], path);
+  if(!(sel = guamps_load(args->file))) {
+    guamps_error("%s: failed to load %s\n", progname, args->file);
     return 1;
   }
   if(!guamps_select(sel, selector, &data)){
-    guamps_error("%s: failed to select %s\n", argv[0], GUAMPS_SELECTOR_NAMES);
+    guamps_error("%s: failed to select %s\n", progname, GUAMPS_SELECTOR_NAMES);
     return 1;
   }
-  guamps_fwrite(stdout, &data);
+
+  FILE *fh = output_file_fopen(args->output, "w");
+  guamps_fwrite(fh, &data);
+  output_file_close(args->output);
 
 }
