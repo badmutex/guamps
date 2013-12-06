@@ -40,7 +40,7 @@ void print_usage(FILE *stream, char *progname) {
 
   // -i/--input
   fprintf(stream,
-	  "    -i  --input FILE          Optional. If given, read the value(s) from this file.\n");
+	  "    -i  --input FILE          Optional. If given, read the value(s) from this file [default=stdin].\n");
 
   // -o/--output
   fprintf(stream,
