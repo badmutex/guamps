@@ -7,8 +7,13 @@ int guamps_init_gromacs(const gmx_init_params_t *params) {
   }
 
   if (params->program_name != NULL) {
-    set_program_name(params->program_name);
+    guamps_gmx_set_progname(params->program_name);
   }
 
+  return true;
+}
+
+int guamps_gmx_set_progname(const char *name) {
+  set_program_name(name);
   return true;
 }

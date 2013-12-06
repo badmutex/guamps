@@ -1,20 +1,15 @@
 #include "guampsio.h"
 #include "gmxutil.h"
 
-
 #include "stdio.h"
 #include "stdbool.h"
 
 
-int init_gmx(){
-  gmx_init_params_t gmx_params;
-  gmx_params.program_name = "guamps_set";
-  return guamps_init_gromacs(&gmx_params);
-}
-
-
 int main(int argc, char *argv[]) {
-  if (!init_gmx()) {
+
+  const char *progname = argv[0];
+
+  if (!guamps_gmx_set_progname(progname)) {
     fprintf(stderr, "Unable to initialize GROMACS\n");
     return 1;
   }

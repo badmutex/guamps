@@ -8,6 +8,7 @@ typedef struct {
 } gmx_init_params_t;
 
 int guamps_init_gromacs(const gmx_init_params_t *params);
+int guamps_gmx_set_progname(const char *name);
 
 
 #endif

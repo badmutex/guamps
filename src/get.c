@@ -8,11 +8,6 @@
 #include <ctype.h>
 #include <string.h>
 
-int init_gmx(){
-  gmx_init_params_t gmx_params;
-  gmx_params.program_name = "guamps_get";
-  return guamps_init_gromacs(&gmx_params);
-}
 
 typedef struct {
   char *file;
@@ -107,7 +102,7 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  if (!init_gmx()) {
+  if (!guamps_gmx_set_progname(progname)) {
     fprintf(stderr, "Unable to initialize GROMACS\n");
     return 1;
   }
