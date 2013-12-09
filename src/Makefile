@@ -10,7 +10,7 @@ progobjs = $(addsuffix .o, ${prognames})
 
 allobjs = $(join ${libobjs}, ${progobjs})
 
-.phony: all
+.PHONY: all
 all : ${libobjs} ${prognames}
 
 # get : ${objects}
@@ -31,6 +31,6 @@ test2 : ${libobjs} test2.o
 	${cc} ${cflags} ${includes} -c $< -o $@
 
 
-.phony: clean
+.PHONY: clean
 clean :
 	rm -f *.o ${objects} ${prognames}
