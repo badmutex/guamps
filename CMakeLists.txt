@@ -21,6 +21,7 @@ set(LIBS ${LIBS} ${GROMACS_LIBRARIES})
 include_directories(include)
 
 # recurese in the the subdirectories
+add_subdirectory(include)
 add_subdirectory(src)
 
 # installation
