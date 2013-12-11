@@ -23,6 +23,13 @@ set(LIBS ${LIBS} ${GROMACS_LIBRARIES})
 # make sure the compiler can find header files for guamps
 include_directories(include)
 
+# static linking works on OS X but not Linux at the moment
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(LinkType STATIC)
+else()
+    set(LinkType SHARED)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 # recurese in the the subdirectories
 add_subdirectory(include)
 add_subdirectory(src)
