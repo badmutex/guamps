@@ -8,7 +8,7 @@ typedef enum {
   NSTEPS,
   selector_t_LAST
 } selector_t;
-static const int selector_t_count = selector_t_LAST - 1;
+static const int selector_t_count = selector_t_LAST;
 
 static const char *GUAMPS_SELECTOR_NAMES[] =
   {[NATOMS]="NATOMS", [POSITIONS]="POSITIONS", [VELOCITIES]="VELOCITIES",
