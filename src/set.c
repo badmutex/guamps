@@ -132,11 +132,7 @@ int main(int argc, char *argv[]) {
 
   obj = guamps_load(args->file);
   guamps_pick_selector(args->select, &sel);
-
-  if(!guamps_selector_type(sel, &type)) {
-    guamps_error("Cannot determine selector type\n");
-    return 1;
-  }
+  type = GUAMPS_SELECTOR_TYPES[sel];
 
   FILE *fh = args_file_fopen(args->input, "r");
   if(!guamps_fread(fh, type, &data)){
