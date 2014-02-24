@@ -100,7 +100,12 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
   case RVEC_T:
     return guamps_fread_rvec(fh, &data->value.v_rvec);
     break;
+  default:
+    guamps_error("guamps_fread: unknown type: %s\n", GUAMPS_TYPE_NAMES[type]);
+    return false;
+    break;
   }
+
 
   return true;
 
