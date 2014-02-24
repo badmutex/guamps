@@ -280,6 +280,10 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
     res->type       = INT_T;
     res->value.v_int = tpr->inputrec.nstfout;
     break;
+  case NSTEPS:
+    res->type	     = INT_T;
+    res->value.v_int = tpr->inputrec.nsteps;
+    break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
     ret = false;
@@ -525,6 +529,7 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
   else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
   else if (0 == strcmp(str, "nstvout")){ *sel = NSTVOUT; }
   else if (0 == strcmp(str, "nstfout")){ *sel = NSTFOUT; }
+  else if (0 == strcmp(str, "nsteps")) { *sel = NSTEPS;  }
   else {
     return false;
   }
