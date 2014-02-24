@@ -128,12 +128,18 @@ int main(int argc, char *argv[]) {
   data_t data;
   selector_t sel;
   selectable_t *obj;
+  type_t type;
 
   obj = guamps_load(args->file);
   guamps_pick_selector(args->select, &sel);
 
+  if(!guamps_selector_type(sel, &type)) {
+    guamps_error("Cannot determine selector type\n");
+    return 1;
+  }
+
   FILE *fh = args_file_fopen(args->input, "r");
-  if(!guamps_fread(fh, RVEC_T, &data)){
+  if(!guamps_fread(fh, type, &data)){
     guamps_error("Cannot read data\n");
     return 1;
   }
