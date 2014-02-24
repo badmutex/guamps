@@ -284,6 +284,10 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
     res->type	     = INT_T;
     res->value.v_int = tpr->inputrec.nsteps;
     break;
+  case TIME:
+    res->type = DOUBLE_T;
+    res->value.v_double = tpr->inputrec.init_t;
+    break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
     ret = false;
@@ -432,12 +436,11 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
     return guamps_fwrite_rvec(fh, data->value.v_rvec.rvec, data->value.v_rvec.length);
     break;
   case INT_T:
-    return guamps_fwrite_scalar(fh, data);
-    break;
   case FLOAT_T:
+  case DOUBLE_T:
     return guamps_fwrite_scalar(fh, data);
   default:
-    guamps_error("guamps_write: unknown type %s\n", GUAMPS_TYPE_NAMES[data->type]);
+    guamps_error("guamps_fwrite: unknown type %s\n", GUAMPS_TYPE_NAMES[data->type]);
     return false;
     break;
   }
@@ -471,6 +474,8 @@ bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
     fprintf(fh, "%d\n", data->value.v_int); break;
   case FLOAT_T:
     fprintf(fh, "%f\n", data->value.v_float); break;
+  case DOUBLE_T:
+    fprintf(fh, "%f\n", data->value.v_double); break;
   default:
     guamps_error("guamps_write_scalar: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[data->type]);
     return false;
