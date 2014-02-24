@@ -112,7 +112,7 @@ bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
 
   fgets(buffer, buffer_size, fh);
   if(sscanf(buffer, spec, value) != 1) {
-    guamps_error("guamps_fread_int: failed to parse int: '%s'\n", buffer);
+    guamps_error("guamps_fread_scalar: failed to parse value: '%s'\n", buffer);
     return false;
   }
   return true;
