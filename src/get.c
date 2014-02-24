@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
     return 1;
   }
   if(!guamps_select(sel, selector, &data)){
-    guamps_error("%s: failed to select %s\n", progname, GUAMPS_SELECTOR_NAMES);
+    guamps_error("%s: failed to select %s\n", progname, GUAMPS_SELECTOR_NAMES[selector]);
     return 1;
   }
 
