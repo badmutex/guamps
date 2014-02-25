@@ -375,6 +375,10 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
   bool ok = true;
 
   switch(sel) {
+  case NATOMS:
+    if(!typecheck(INT_T,new->type)){ ok = false; break;}
+    tpr->state.natoms = new->value.v_int;
+    break;
   case POSITIONS:
     if(!typecheck(RVEC_T,new->type)) ok = false;
     tpr->state.x = new->value.v_rvec.rvec;
