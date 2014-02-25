@@ -82,33 +82,33 @@ trr_t * guamps_load_trr(const char *path) {
  ***********************************************************************/
 bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
 
+  bool ok = true;
+
   data->type = type;
 
   switch(type) {
   case INT_T:
-    return guamps_fread_scalar(fh, "%d", &data->value.v_int);
+    ok = guamps_fread_scalar(fh, "%d", &data->value.v_int);
     break;
   case LLINT_T:
-    return guamps_fread_scalar(fh, "%lld", &data->value.v_llint);
+    ok = guamps_fread_scalar(fh, "%lld", &data->value.v_llint);
     break;
   case FLOAT_T:
-    return guamps_fread_scalar(fh, "%f", &data->value.v_float);
+    ok = guamps_fread_scalar(fh, "%f", &data->value.v_float);
     break;
   case DOUBLE_T:
-    return guamps_fread_scalar(fh, "%lf", &data->value.v_double);
+    ok = guamps_fread_scalar(fh, "%lf", &data->value.v_double);
     break;
   case RVEC_T:
-    return guamps_fread_rvec(fh, &data->value.v_rvec);
+    ok = guamps_fread_rvec(fh, &data->value.v_rvec);
     break;
   default:
     guamps_error("guamps_fread: unknown type: %s\n", GUAMPS_TYPE_NAMES[type]);
-    return false;
+    ok = false;
     break;
   }
 
-
-  return true;
-
+  return ok;
 }
 
 bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
