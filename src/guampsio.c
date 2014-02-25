@@ -95,7 +95,7 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
     return guamps_fread_scalar(fh, "%f", &data->value.v_float);
     break;
   case DOUBLE_T:
-    return guamps_fread_scalar(fh, "%f", &data->value.v_double);
+    return guamps_fread_scalar(fh, "%lf", &data->value.v_double);
     break;
   case RVEC_T:
     return guamps_fread_rvec(fh, &data->value.v_rvec);
