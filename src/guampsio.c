@@ -340,8 +340,8 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
     res->value.v_int = trr->header.step;
     break;
   case TIME:
-    res->type = FLOAT_T;
-    res->value.v_float = trr->header.t;
+    res->type = DOUBLE_T;
+    res->value.v_double = trr->header.t;
     break;
   default:
     guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel]);
