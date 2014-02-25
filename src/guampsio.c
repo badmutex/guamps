@@ -293,6 +293,10 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
     res->type = DOUBLE_T;
     res->value.v_double = tpr->inputrec.init_t;
     break;
+  case LD_SEED:
+    res->type = INT_T;
+    res->value.v_int = tpr->inputrec.ld_seed;
+    break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
     ret = false;
@@ -395,7 +399,7 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     if(!typecheck(DOUBLE_T, new->type)) ok = false;
     tpr->inputrec.init_t = new->value.v_double;
     break;
-  case SEED:
+  case LD_SEED:
     if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.ld_seed = new->value.v_int;
     break;
