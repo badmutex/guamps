@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
   type_t type;
 
   obj = guamps_load(args->file);
-  guamps_pick_selector(args->select, &sel);
+  if(!guamps_pick_selector(args->select, &sel)){ return 1; }
   type = GUAMPS_SELECTOR_TYPES[sel];
 
   FILE *fh = args_file_fopen(args->input, "r");

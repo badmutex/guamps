@@ -368,54 +368,60 @@ bool guamps_update(selectable_t *obj, const selector_t sel, const data_t *new) {
 
 bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
 
+  bool ok = true;
+
   switch(sel) {
   case POSITIONS:
-    if(!typecheck(RVEC_T,new->type)) return false;
+    if(!typecheck(RVEC_T,new->type)) ok = false;
     tpr->state.x = new->value.v_rvec.rvec;
     break;
   case VELOCITIES:
-    if(!typecheck(RVEC_T,new->type)) return false;
+    if(!typecheck(RVEC_T,new->type)) ok = false;
     tpr->state.v = new->value.v_rvec.rvec;
     break;
   case FORCES:
-    if (!typecheck(RVEC_T, new->type)) return false;
+    if (!typecheck(RVEC_T, new->type)) ok = false;
     tpr->f = new->value.v_rvec.rvec;
     break;
   case LAMBDA:
-    if(!typecheck(FLOAT_T, new->type)) return false;
+    if(!typecheck(FLOAT_T, new->type)) ok = false;
     tpr->state.lambda = new->value.v_float;
     break;
   case STEP:
-    if(!typecheck(LLINT_T, new->type)) return false;
+    if(!typecheck(LLINT_T, new->type)) ok = false;
     tpr->inputrec.init_step = new->value.v_llint;
     break;
   case TIME:
-    if(!typecheck(DOUBLE_T, new->type)) return false;
+    if(!typecheck(DOUBLE_T, new->type)) ok = false;
     tpr->inputrec.init_t = new->value.v_double;
     break;
   case SEED:
-    if(!typecheck(INT_T, new->type)) return false;
+    if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.ld_seed = new->value.v_int;
     break;
   case NSTLOG:
-    if(!typecheck(INT_T, new->type)) return false;
+    if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.nstlog = new->value.v_int;
     break;
   case NSTXOUT:
-    if(!typecheck(INT_T, new->type)) return false;
+    if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.nstxout = new->value.v_int;
     break;
   case NSTVOUT:
-    if(!typecheck(INT_T, new->type)) return false;
+    if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.nstlog = new->value.v_int;
     break;
   case NSTFOUT:
-    if(!typecheck(INT_T, new->type)) return false;
+    if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.nstlog = new->value.v_int;
+    break;
+  default:
+    guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    ok = false;
     break;
   }
 
-  return true;
+  return ok;
 }
 
 
@@ -540,7 +546,9 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
   else if (0 == strcmp(str, "nstvout")){ *sel = NSTVOUT; }
   else if (0 == strcmp(str, "nstfout")){ *sel = NSTFOUT; }
   else if (0 == strcmp(str, "nsteps")) { *sel = NSTEPS;  }
+  else if (0 == strcmp(str, "ld_seed")){ *sel = LD_SEED; }
   else {
+    guamps_error("guamps_pick_selector: unknown option: %s\n", str);
     return false;
   }
   return true;
