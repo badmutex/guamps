@@ -1,6 +1,7 @@
 #ifndef __GUAMPS_DATA_H__
 #define __GUAMPS_DATA_H__
 
+#include "gmx_t.h"
 #include "output.h"
 
 #include "stdbool.h"
@@ -39,6 +40,13 @@ typedef struct {
   type_t type;
   value_t value;
 } data_t;
+
+// Set the value of the data_t
+void guamps_data_set(const type_t, const void *, data_t *);
+
+// Get the value of the data based on it's type_t
+// The result is returned as a (void*) so you need to cast it.
+void * guamps_data_get(const data_t*);
 
 
 typedef enum {

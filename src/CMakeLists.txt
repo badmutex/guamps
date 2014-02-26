@@ -1,5 +1,5 @@
 # create a library of the main functions
-add_library(guamps ${LinkType} guampsio.c gmx_t.c gmxutil.c output.c)
+add_library(guamps ${LinkType} guampsio.c gmx_t.c gmxutil.c output.c data.c)
 
 # the api executables
 add_executable(guamps_get get.c)
