@@ -458,6 +458,7 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
     return guamps_fwrite_rvec(fh, data->value.v_rvec.rvec, data->value.v_rvec.length);
     break;
   case INT_T:
+  case LLINT_T:
   case FLOAT_T:
   case DOUBLE_T:
     return guamps_fwrite_scalar(fh, data);
@@ -494,6 +495,8 @@ bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
   switch(data->type) {
   case INT_T:
     fprintf(fh, "%d\n", data->value.v_int); break;
+  case LLINT_T:
+    fprintf(fh, "%lld\n", data->value.v_llint); break;
   case FLOAT_T:
     fprintf(fh, "%f\n", data->value.v_float); break;
   case DOUBLE_T:
