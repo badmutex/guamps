@@ -50,6 +50,8 @@ void print_usage(FILE *stream, char *progname) {
 
 arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
+  if (argc <= 1) { return NULL; }
+
   arguments_t *args = (arguments_t *)malloc(sizeof(arguments_t));
   args->output = (args_file_t *)malloc(sizeof(args_file_t));
 
@@ -83,7 +85,6 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
     case 'h':
     case '?':
     default:
-      print_usage(stderr, argv[0]);
       return NULL;
     }
   }
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]){
 
   arguments_t *args = parse_opts(argc, argv, options);
   if(args == NULL) {
+    print_usage(stderr, argv[0]);
     return 1;
   }
 
