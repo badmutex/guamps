@@ -363,6 +363,12 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
   bool ok = true;
   rvec_t vec;
 
+  /* when modifying the cases it is best to do it in several steps:
+     1. add the new entry without casting. the compiler warning/error
+        will act as a sanity check
+     2. add the appropriate cast
+   */
+
   switch(sel) {
   case NATOMS:
     tpr->state.natoms = *(int*)guamps_data_get(new);
