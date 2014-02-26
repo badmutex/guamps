@@ -2,4 +2,4 @@
 
 . utils.sh
 
-test-scalar time
+test-scalar time init_t

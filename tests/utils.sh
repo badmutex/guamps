@@ -27,8 +27,8 @@ gset() {
 }
 
 check_scalar() {
-    ref=$1
-    val=$2
+    ref=$(echo $1 | bc -l)
+    val=$(echo $2 | bc -l)
     if [[ $ref == $val ]]; then
 	echo "OK"
 	return 0
@@ -109,11 +109,13 @@ random_vector() {
 
 test-scalar() {
     sel=$1
+    grepname=$2
+    test -z $grepname && grepname=$sel
 
     echo -n "    get..."
     gget $IN_TPR $sel out.gps >/dev/null 2>&1
     check_scalar \
-	$(tpr_get_scalar $IN_TPR $sel) \
+	$(tpr_get_scalar $IN_TPR $grepname) \
 	$(cat out.gps)
 
     echo -n "    set..."
@@ -122,7 +124,7 @@ test-scalar() {
     gset $IN_TPR $OUT_TPR $sel out.gps >/dev/null 2>&1
     check_scalar \
 	$val \
-	$(tpr_get_scalar $OUT_TPR $sel)
+	$(tpr_get_scalar $OUT_TPR $grepname)
 }
 
 test-vector() {
