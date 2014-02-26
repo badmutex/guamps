@@ -239,63 +239,51 @@ bool guamps_select_cpt(const cpt_t *cpt , const selector_t sel, data_t *res) {
 
 bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   int ret = true;
+  res->type = GUAMPS_SELECTOR_TYPES[sel];
 
   switch(sel) {
   case NATOMS:
-    res->type       = INT_T;
-    res->value.v_int = tpr->natoms;
+    guamps_data_set(res->type, (void*)&tpr->natoms, res);
     break;
   case POSITIONS:
-    res->type               = RVEC_T;
     res->value.v_rvec.rvec   = tpr->state.x;
     res->value.v_rvec.length = tpr->natoms;
     break;
   case VELOCITIES:
-    res->type               = RVEC_T;
     res->value.v_rvec.rvec   = tpr->state.v;
     res->value.v_rvec.length = tpr->natoms;
     break;
   case FORCES:
-    res->type               = RVEC_T;
     res->value.v_rvec.rvec   = tpr->f;
     res->value.v_rvec.length = tpr->natoms;
     break;
   case LAMBDA:
-    res->type         = FLOAT_T;
-    res->value.v_float = tpr->state.lambda;
+    guamps_data_set(res->type, (void*)&tpr->state.lambda, res);
     break;
   case BOX:
-    res->type               = RVEC_T;
     res->value.v_rvec.rvec   = (rvec *) tpr->state.box;
     res->value.v_rvec.length = 3;
     break;
   case NSTLOG:
-    res->type       = INT_T;
-    res->value.v_int = tpr->inputrec.nstlog;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.nstlog, res);
     break;
   case NSTXOUT:
-    res->type       = INT_T;
-    res->value.v_int = tpr->inputrec.nstxout;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.nstxout, res);
     break;
   case NSTVOUT:
-    res->type       = INT_T;
-    res->value.v_int = tpr->inputrec.nstvout;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.nstvout, res);
     break;
   case NSTFOUT:
-    res->type       = INT_T;
-    res->value.v_int = tpr->inputrec.nstfout;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.nstfout, res);
     break;
   case NSTEPS:
-    res->type	     = INT_T;
-    res->value.v_int = tpr->inputrec.nsteps;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.nsteps, res);
     break;
   case TIME:
-    res->type = DOUBLE_T;
-    res->value.v_double = tpr->inputrec.init_t;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.init_t, res);
     break;
   case LD_SEED:
-    res->type = INT_T;
-    res->value.v_int = tpr->inputrec.ld_seed;
+    guamps_data_set(res->type, (void*)&tpr->inputrec.ld_seed, res);
     break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
