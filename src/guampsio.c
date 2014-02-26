@@ -361,58 +361,50 @@ bool guamps_update(selectable_t *obj, const selector_t sel, const data_t *new) {
 bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
 
   bool ok = true;
+  rvec_t vec;
 
   switch(sel) {
   case NATOMS:
-    if(!typecheck(INT_T,new->type)){ ok = false; break;}
-    tpr->state.natoms = new->value.v_int;
+    tpr->state.natoms = *(int*)guamps_data_get(new);
     break;
   case POSITIONS:
-    if(!typecheck(RVEC_T,new->type)) ok = false;
-    tpr->state.x = new->value.v_rvec.rvec;
+    vec = *(rvec_t*)guamps_data_get(new);
+    tpr->state.x = vec.rvec;
     break;
   case VELOCITIES:
-    if(!typecheck(RVEC_T,new->type)) ok = false;
-    tpr->state.v = new->value.v_rvec.rvec;
+    vec = *(rvec_t*)guamps_data_get(new);
+    tpr->state.v = vec.rvec;
     break;
   case FORCES:
-    if (!typecheck(RVEC_T, new->type)) ok = false;
-    tpr->f = new->value.v_rvec.rvec;
+    vec = *(rvec_t*)guamps_data_get(new);
+    tpr->f = vec.rvec;
     break;
   case LAMBDA:
-    if(!typecheck(FLOAT_T, new->type)) ok = false;
-    tpr->state.lambda = new->value.v_float;
+    tpr->state.lambda = *(float*)guamps_data_get(new);
     break;
   case STEP:
-    if(!typecheck(LLINT_T, new->type)) ok = false;
-    tpr->inputrec.init_step = new->value.v_llint;
+    tpr->inputrec.init_step = *(long long int*)guamps_data_get(new);
     break;
   case TIME:
-    if(!typecheck(DOUBLE_T, new->type)) ok = false;
-    tpr->inputrec.init_t = new->value.v_double;
+    tpr->inputrec.init_t = *(double*)guamps_data_get(new);
     break;
   case LD_SEED:
-    if(!typecheck(INT_T, new->type)) ok = false;
-    tpr->inputrec.ld_seed = new->value.v_int;
+    tpr->inputrec.ld_seed = *(int*)guamps_data_get(new);
     break;
   case NSTLOG:
-    if(!typecheck(LLINT_T, new->type)) ok = false;
-    tpr->inputrec.nstlog = new->value.v_llint;
+    tpr->inputrec.nstlog = *(int*)guamps_data_get(new);
     break;
   case NSTXOUT:
-    if(!typecheck(LLINT_T, new->type)) ok = false;
-    tpr->inputrec.nstxout = new->value.v_llint;
+    tpr->inputrec.nstxout = *(int*)guamps_data_get(new);
     break;
   case NSTVOUT:
-    if(!typecheck(LLINT_T, new->type)) ok = false;
-    tpr->inputrec.nstvout = new->value.v_llint;
+    tpr->inputrec.nstvout = *(int*)guamps_data_get(new);
     break;
   case NSTFOUT:
-    if(!typecheck(LLINT_T, new->type)) ok = false;
-    tpr->inputrec.nstfout = new->value.v_llint;
+    tpr->inputrec.nstfout = *(int*)guamps_data_get(new);
     break;
   case NSTEPS:
-    tpr->inputrec.nsteps = new->value.v_int;
+    tpr->inputrec.nsteps = *(long long int*)guamps_data_get(new);
     break;
   default:
     guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
