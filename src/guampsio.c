@@ -423,6 +423,9 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     if(!typecheck(INT_T, new->type)) ok = false;
     tpr->inputrec.nstlog = new->value.v_int;
     break;
+  case NSTEPS:
+    tpr->inputrec.nsteps = new->value.v_int;
+    break;
   default:
     guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
     ok = false;
