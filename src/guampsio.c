@@ -416,8 +416,8 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     tpr->inputrec.nstxout = new->value.v_int;
     break;
   case NSTVOUT:
-    if(!typecheck(INT_T, new->type)) ok = false;
-    tpr->inputrec.nstlog = new->value.v_int;
+    if(!typecheck(LLINT_T, new->type)) ok = false;
+    tpr->inputrec.nstvout = new->value.v_llint;
     break;
   case NSTFOUT:
     if(!typecheck(LLINT_T, new->type)) ok = false;
