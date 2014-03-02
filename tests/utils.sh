@@ -29,12 +29,13 @@ gset() {
 check_scalar() {
     ref=$(echo $1 | bc -l)
     val=$(echo $2 | bc -l)
-    if [[ $ref == $val ]]; then
+
+    if [ $(echo "$1 == $2" | bc) -eq 1 ]; then
 	echo "OK"
-	return 0
-    else
+	return 0;
+    else:
 	echo "ERROR: expected $ref but got $val"
-    	exit 1
+	exit 1;
     fi
 }
 
