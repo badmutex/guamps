@@ -8,6 +8,7 @@ typedef enum {
   FORCES, LAMBDA, BOX, TIME,
   SEED, NSTLOG, NSTXOUT, NSTVOUT, NSTFOUT,
   NSTEPS, LD_SEED,
+  DELTAT,
   selector_t_LAST
 } selector_t;
 static const int selector_t_count = selector_t_LAST;
@@ -17,6 +18,7 @@ static const char *GUAMPS_SELECTOR_NAMES[] =
    [FORCES]="FORCES", [LAMBDA]="LAMBDA", [BOX]="BOX", [TIME]="TIME",
    [SEED]="SEED", [NSTLOG]="NSTLOG", [NSTXOUT]="NSTXOUT", [NSTVOUT]="NSTVOUT", [NSTFOUT]="NSTFOUT",
    [NSTEPS]="NSTEPS", [LD_SEED]="LD_SEED",
+   [DELTAT]="DELTAT",
   };
 
 static const type_t GUAMPS_SELECTOR_TYPES[] =
@@ -24,6 +26,7 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [FORCES]=RVEC_T, [LAMBDA]=FLOAT_T, [BOX]=RVEC_T, [TIME]=DOUBLE_T,
    [SEED]=INT_T, [NSTLOG]=INT_T, [NSTXOUT]=INT_T, [NSTVOUT]=INT_T, [NSTFOUT]=INT_T,
    [NSTEPS]=LLINT_T, [LD_SEED]=INT_T,
+   [DELTAT]=DOUBLE_T,
   };
 
 #endif
