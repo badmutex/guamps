@@ -327,10 +327,6 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
     res->value.v_rvec.rvec = (rvec *)trr->box;
     res->value.v_rvec.length = 3;
     break;
-  case STEP:
-    res->type = INT_T;
-    res->value.v_int = trr->header.step;
-    break;
   case TIME:
     res->type = DOUBLE_T;
     res->value.v_double = trr->header.t;
@@ -387,9 +383,6 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     break;
   case LAMBDA:
     tpr->state.lambda = *(float*)guamps_data_get(new);
-    break;
-  case STEP:
-    tpr->inputrec.init_step = *(long long int*)guamps_data_get(new);
     break;
   case TIME:
     tpr->inputrec.init_t = *(double*)guamps_data_get(new);
@@ -536,8 +529,6 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
     *sel = LAMBDA; }
   else if (0 == strcmp(str, "box")) {
     *sel = BOX; }
-  else if (0 == strcmp(str, "step")) {
-    *sel = STEP; }
   else if (0 == strcmp(str, "time")) {
     *sel = TIME; }
   // RNG not supported
