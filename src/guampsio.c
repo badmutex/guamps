@@ -288,6 +288,9 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   case DELTAT:
     guamps_data_set(res->type, &tpr->inputrec.delta_t, res);
     break;
+  case NSTXTCOUT:
+    guamps_data_set(res->type, &tpr->inputrec.nstxtcout, res);
+    break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
     ret = false;
@@ -410,6 +413,9 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     break;
   case DELTAT:
     tpr->inputrec.delta_t = *(double*)guamps_data_get(new);
+    break;
+  case NSTXTCOUT:
+    tpr->inputrec.nstxtcout = *(int*)guamps_data_get(new);
     break;
   default:
     guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
@@ -545,6 +551,7 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
   else if (0 == strcmp(str, "nsteps")) { *sel = NSTEPS;  }
   else if (0 == strcmp(str, "ld_seed")){ *sel = LD_SEED; }
   else if (0 == strcmp(str, "deltat")) { *sel = DELTAT;  }
+  else if (0 == strcmp(str, "nstxtcout")){*sel= NSTXTCOUT;}
   else {
     guamps_error("guamps_pick_selector: unknown option: %s\n", str);
     return false;
