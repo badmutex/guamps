@@ -1,5 +1,6 @@
 #include "guampsio.h"
 
+#include "gromacs/trnio.h"
 #include "gromacs/tpxio.h"
 #include "string.h"
 
@@ -239,7 +240,7 @@ bool guamps_select_cpt(const cpt_t *cpt , const selector_t sel, data_t *res) {
 
 bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   int ret = true;
-  res->type = GUAMPS_SELECTOR_TYPES[sel];
+  res->type = guamps_selector_type(TPR_F, sel);
 
   switch(sel) {
   case NATOMS:
@@ -303,39 +304,36 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
 bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
 
   bool ok = true;
+  res->type = guamps_selector_type(TRR_F, sel);
+  rvec_t vec;
 
   switch(sel) {
   case NATOMS:
-    res->type = INT_T;
-    res->value.v_int = trr->header.natoms;
+    guamps_data_set(res->type, &trr->header.natoms, res);
     break;
   case POSITIONS:
-    res->type = RVEC_T;
-    res->value.v_rvec.rvec = trr->x;
-    res->value.v_rvec.length = trr->header.natoms;
+    vec.rvec = trr->x;
+    vec.length = trr->header.natoms;
+    guamps_data_set(res->type, &vec, res);
     break;
   case VELOCITIES:
-    res->type = RVEC_T;
-    res->value.v_rvec.rvec = trr->v;
-    res->value.v_rvec.length = trr->header.natoms;
+    vec.rvec = trr->v;
+    vec.length = trr->header.natoms;
+    guamps_data_set(res->type, &vec, res);
     break;
   case FORCES:
-    res->type = RVEC_T;
-    res->value.v_rvec.rvec = trr->f;
-    res->value.v_rvec.length = trr->header.natoms;
+    vec.rvec = trr->f;
+    vec.length = trr->header.natoms;
+    guamps_data_set(res->type, &vec, res);
     break;
   case LAMBDA:
-    res->type = FLOAT_T;
-    res->value.v_float = trr->header.lambda;
+    guamps_data_set(res->type, &trr->header.lambda, res);
     break;
   case BOX:
-    res->type = RVEC_T;
-    res->value.v_rvec.rvec = (rvec *)trr->box;
-    res->value.v_rvec.length = 3;
+    guamps_data_set(res->type, &trr->box, res);
     break;
   case TIME:
-    res->type = DOUBLE_T;
-    res->value.v_double = trr->header.t;
+    guamps_data_set(res->type, &trr->header.t, res);
     break;
   default:
     guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel]);
@@ -426,6 +424,49 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
   return ok;
 }
 
+bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
+
+  bool ok = true;
+  rvec_t vec;
+
+  switch(sel) {
+  case NATOMS:
+    trr->header.natoms = *(int*)guamps_data_get(new);
+    break;
+  case POSITIONS:
+    vec = *(rvec_t*)guamps_data_get(new);
+    trr->x = vec.rvec;
+    break;
+  case VELOCITIES:
+    vec = *(rvec_t*)guamps_data_get(new);
+    trr->v = vec.rvec;
+    break;
+  case FORCES:
+    vec = *(rvec_t*)guamps_data_get(new);
+    trr->f = vec.rvec;
+    break;
+  case LAMBDA:
+    trr->header.lambda = *(float*)guamps_data_get(new);
+    break;
+  case BOX:
+    guamps_error("guamps_update_trr: don't yet know how to set BOX\n");
+    ok = false;
+    break;
+  case TIME:
+    trr->header.t = *(real*)guamps_data_get(new);
+    break;
+  case STEP:
+    trr->header.step = *(int*)guamps_data_get(new);
+    break;
+  default:
+    guamps_error("guamps_update_trr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    ok = false;
+    break;
+  }
+
+  return ok;
+}
+
 
 /* *********************************************************************
    Writing to files
@@ -435,6 +476,9 @@ bool guamps_write(const char *path, const selectable_t *obj) {
   switch(obj->kind) {
   case TPR_F:
     return guamps_write_tpr(path, &obj->data.p_tpr);
+    break;
+  case TRR_F:
+    return guamps_write_trr(path, &obj->data.p_trr);
     break;
   default:
     guamps_error("guamps_write: I don't know how to write a %s file\n", GUAMPS_FILETYPE_NAMES[obj->kind]);
@@ -448,15 +492,18 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
   case RVEC_T:
     return guamps_fwrite_rvec(fh, data->value.v_rvec.rvec, data->value.v_rvec.length);
     break;
+  case MATRIX_T:
+    return guamps_fwrite_rvec(fh, data->value.v_matrix, 3);
+    break;
   case INT_T:
   case LLINT_T:
   case FLOAT_T:
   case DOUBLE_T:
     return guamps_fwrite_scalar(fh, data);
-  default:
-    guamps_error("guamps_fwrite: unknown type %s\n", GUAMPS_TYPE_NAMES[data->type]);
-    return false;
     break;
+  case REAL_T:
+    guamps_error("guamps_write: Unknown type REAL_T\n");
+    return false;
   }
   return true;
 }
@@ -477,6 +524,20 @@ bool guamps_write_tpr(const char *path, const tpr_t *tpr) {
 		  &t->mtop);
 
   return true;
+}
+
+bool guamps_write_trr(const char *path, const trr_t *trr) {
+  trr_t *t = (trr_t *)trr;
+
+  /*
+  void write_trn(const char *fn,int step,real t,real lambda,
+		       rvec *box,int natoms,rvec *x,rvec *v,rvec *f);
+  */
+  write_trn(path, t->header.step, t->header.t, t->header.lambda,
+	    t->box, t->header.natoms, t->x, t->v, t->f);
+
+  return true;
+
 }
 
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
@@ -541,8 +602,7 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
     *sel = LAMBDA; }
   else if (0 == strcmp(str, "box")) {
     *sel = BOX; }
-  else if (0 == strcmp(str, "time")) {
-    *sel = TIME; }
+  else if (0 == strcmp(str, "time")) { *sel = TIME; }
   // RNG not supported
   else if (0 == strcmp(str, "nstlog")) { *sel = NSTLOG; }
   else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
@@ -552,6 +612,7 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
   else if (0 == strcmp(str, "ld_seed")){ *sel = LD_SEED; }
   else if (0 == strcmp(str, "deltat")) { *sel = DELTAT;  }
   else if (0 == strcmp(str, "nstxtcout")){*sel= NSTXTCOUT;}
+  else if (0 == strcmp(str, "step"))   {*sel= STEP;}
   else {
     guamps_error("guamps_pick_selector: unknown option: %s\n", str);
     return false;
