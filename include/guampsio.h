@@ -54,7 +54,6 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int count);
    Parsing selection string from user
  ***********************************************************************/
 bool guamps_pick_selector(const char *str, selector_t *sel);
-bool guamps_selector_type(const selector_t sel, type_t *type);
 bool guamps_pick_filetype(const char *path, filetype_t *ftype);
 
 #endif

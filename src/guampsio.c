@@ -240,7 +240,7 @@ bool guamps_select_cpt(const cpt_t *cpt , const selector_t sel, data_t *res) {
 
 bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   int ret = true;
-  res->type = GUAMPS_SELECTOR_TYPES[sel];
+  res->type = guamps_selector_type(TPR_F, sel);
 
   switch(sel) {
   case NATOMS:
@@ -304,7 +304,7 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
 bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
 
   bool ok = true;
-  res->type = GUAMPS_SELECTOR_TYPES[sel];
+  res->type = guamps_selector_type(TRR_F, sel);
   rvec_t vec;
 
   switch(sel) {
@@ -453,7 +453,7 @@ bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
     ok = false;
     break;
   case TIME:
-    trr->header.t = *(float*)guamps_data_get(new);
+    trr->header.t = *(real*)guamps_data_get(new);
     break;
   case STEP:
     trr->header.step = *(int*)guamps_data_get(new);
@@ -501,6 +501,9 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
   case DOUBLE_T:
     return guamps_fwrite_scalar(fh, data);
     break;
+  case REAL_T:
+    guamps_error("guamps_write: Unknown type REAL_T\n");
+    return false;
   }
   return true;
 }
@@ -599,8 +602,7 @@ bool guamps_pick_selector(const char *str, selector_t *sel) {
     *sel = LAMBDA; }
   else if (0 == strcmp(str, "box")) {
     *sel = BOX; }
-  else if (0 == strcmp(str, "time")) {
-    *sel = TIME; }
+  else if (0 == strcmp(str, "time")) { *sel = TIME; }
   // RNG not supported
   else if (0 == strcmp(str, "nstlog")) { *sel = NSTLOG; }
   else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
