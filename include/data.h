@@ -9,11 +9,13 @@
 typedef enum {
   INT_T, LLINT_T, FLOAT_T, DOUBLE_T, // scalar
   RVEC_T, // vectors
+  MATRIX_T, // gmx matrix
 } type_t;
 
 static const char *GUAMPS_TYPE_NAMES[] =  {
   [INT_T]="INT_T", [LLINT_T]="LLINT_T",  [FLOAT_T]="FLOAT_T", [DOUBLE_T]="DOUBLE_T",
   [RVEC_T]="RVEC_T",
+  [MATRIX_T]="MATRIX_T",
 };
 
 static bool typecheck(type_t a, type_t b) {
@@ -34,6 +36,7 @@ typedef struct {
 typedef union {
   int v_int; long long int v_llint; float v_float; double v_double;
   rvec_t v_rvec;
+  matrix v_matrix;
 } value_t;
 
 typedef struct {

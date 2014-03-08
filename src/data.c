@@ -22,9 +22,20 @@ void guamps_data_set(const type_t type, const void* val, data_t *data) {
     data->value.v_double = *(double*)val;
     break;
 
-  default:
-    guamps_error("guamps_data_set: I don't know how to set type %s\n", GUAMPS_TYPE_NAMES[type]);
+  case RVEC_T:
+    data->value.v_rvec = *(rvec_t*)val;
     break;
+
+  case MATRIX_T:
+
+    for (int i=0; i<3; i++){
+      for (int j=0; j<3; j++){
+	data->value.v_matrix[i][j] = (*(matrix*)val)[i][j];
+      }
+    }
+    /* data->value.v_matrix = *(matrix**)val; */
+    break;
+
   }
 
 }
@@ -62,6 +73,10 @@ void * guamps_data_get(const data_t *data) {
 
   case RVEC_T:
     return (void *)&data->value.v_rvec;
+    break;
+
+  case MATRIX_T:
+    return (void *)&data->value.v_matrix;
     break;
 
   }

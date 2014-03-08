@@ -37,6 +37,7 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res);
  ***********************************************************************/
 bool guamps_update(selectable_t *obj, const selector_t sel, const data_t *new);
 bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new);
+bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new);
 
 /* *********************************************************************
    Writing to files
@@ -44,6 +45,7 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new);
 bool guamps_write(const char *path, const selectable_t * obj);
 bool guamps_fwrite(FILE *fh, const data_t *data);
 bool guamps_write_tpr(const char *path, const tpr_t *tpr);
+bool guamps_write_trr(const char *path, const trr_t *trr);
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
 bool guamps_fwrite_scalar(FILE *fh, const data_t *data);
 bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int count);
