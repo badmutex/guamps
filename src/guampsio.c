@@ -332,10 +332,6 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
   case BOX:
     guamps_data_set(res->type, &trr->box, res);
     break;
-    /* res->type = RVEC_T; */
-    /* res->value.v_rvec.rvec = (rvec *)trr->box; */
-    /* res->value.v_rvec.length = 3; */
-  /*   break; */
   case TIME:
     guamps_data_set(res->type, &trr->header.t, res);
     break;
