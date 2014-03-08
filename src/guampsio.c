@@ -319,10 +319,12 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
   case VELOCITIES:
     vec.rvec = trr->v;
     vec.length = trr->header.natoms;
+    guamps_data_set(res->type, &vec, res);
     break;
   case FORCES:
     vec.rvec = trr->f;
     vec.length = trr->header.natoms;
+    guamps_data_set(res->type, &vec, res);
     break;
   case LAMBDA:
     guamps_data_set(res->type, &trr->header.lambda, res);
