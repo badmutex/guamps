@@ -6,14 +6,20 @@
 
 #include "stdbool.h"
 
+#ifdef GMX_DOUBLE
+#define GMX_REAL_TYPE_T DOUBLE_T
+#else
+#define GMX_REAL_TYPE_T FLOAT_T
+#endif
+
 typedef enum {
-  INT_T, LLINT_T, FLOAT_T, DOUBLE_T, // scalar
+  INT_T, LLINT_T, FLOAT_T, DOUBLE_T, REAL_T, // scalar
   RVEC_T, // vectors
   MATRIX_T, // gmx matrix
 } type_t;
 
 static const char *GUAMPS_TYPE_NAMES[] =  {
-  [INT_T]="INT_T", [LLINT_T]="LLINT_T",  [FLOAT_T]="FLOAT_T", [DOUBLE_T]="DOUBLE_T",
+  [INT_T]="INT_T", [LLINT_T]="LLINT_T",  [FLOAT_T]="FLOAT_T", [DOUBLE_T]="DOUBLE_T", [REAL_T]="REAL_T",
   [RVEC_T]="RVEC_T",
   [MATRIX_T]="MATRIX_T",
 };

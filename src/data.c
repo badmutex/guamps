@@ -22,6 +22,10 @@ void guamps_data_set(const type_t type, const void* val, data_t *data) {
     data->value.v_double = *(double*)val;
     break;
 
+  case REAL_T:
+    guamps_data_set(GMX_REAL_TYPE_T, val, data);
+    break;
+
   case RVEC_T:
     data->value.v_rvec = *(rvec_t*)val;
     break;
@@ -69,6 +73,11 @@ void * guamps_data_get(const data_t *data) {
 
   case DOUBLE_T:
     return (void *)&data->value.v_double;
+    break;
+
+  case REAL_T:
+    guamps_error("guamps_data_get: I don't know how to get a REAL_T value\n");
+    return NULL;
     break;
 
   case RVEC_T:
