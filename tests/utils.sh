@@ -1,3 +1,5 @@
+set -x
+
 export GMX_MAXBACKUP=-1
 
 IN_TPR=data/topol.tpr
@@ -115,17 +117,19 @@ test-scalar() {
 
     echo -n "    get..."
     gget $IN_TPR $sel out.gps >/dev/null 2>&1
+    ref=$(tpr_get_scalar $IN_TPR $grepname)
     check_scalar \
-	$(tpr_get_scalar $IN_TPR $grepname) \
+	$ref \
 	$(cat out.gps)
 
     echo -n "    set..."
     val=42
     echo $val >out.gps
     gset $IN_TPR $OUT_TPR $sel out.gps >/dev/null 2>&1
+    ref=$(tpr_get_scalar $OUT_TPR $grepname)
     check_scalar \
 	$val \
-	$(tpr_get_scalar $OUT_TPR $grepname)
+	$ref
 }
 
 test-vector() {
