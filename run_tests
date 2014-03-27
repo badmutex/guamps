@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 # check commands are installed
 which gmxdump   
@@ -17,4 +17,5 @@ for script in test_*.sh; do
     name=${script%%.sh}
     echo "- $name"
     ./$script
+    break
 done
