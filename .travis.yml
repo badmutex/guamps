@@ -3,7 +3,7 @@ compiler: clang
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install automake1.10 fftw3 fftw3-dev
+  - sudo apt-get install automake1.10 bc fftw3 fftw3-dev
   - ./ci/install-gromacs.sh
 
 install:
