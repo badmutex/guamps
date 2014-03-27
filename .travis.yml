@@ -7,11 +7,6 @@ before_install:
   - ./ci/install-gromacs.sh
 
 install:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make
-  - sudo make install
-  - cd ..
+  - ./ci/install-guamps.sh
 
 script: ./run_tests
