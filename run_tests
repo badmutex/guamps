@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-which guamps_get >/dev/null 2>&1
+set -e
+
+# check commands are installed
+which gmxdump   
+which guamps_get
+which guamps_set
+
 if [[ ! $? -eq 0 ]]; then
     echo "Cannot find guamps executables"
     exit 1;
