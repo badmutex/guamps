@@ -3,7 +3,8 @@ compiler: clang
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install gromacs
+  - sudo apt-get install fftw3 fftw3-dev
+  - ./ci/install-gromacs.sh
 
 install:
   - mkdir build
