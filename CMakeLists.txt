@@ -7,6 +7,29 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/bin)
 
+# find external dependencies
+# find_package(GROMACS COMPONENTS libgmx REQUIRED)
+set(GROMACS_LIBRARY "GROMACS_LIBRARY-NOT_FOUND" CACHE FILEPATH "path/to/libgmx.a")
+set(GROMACS_INCLUDE_DIR "GROMACS_INCLUDE_DIR-NOT_FOUND" CACHE FILEPATH "path/to/include")
+set(LinkLibs ${GROMACS_LIBRARY})
+
+### statically link to libraries.
+### The mechanism is hacked together
+### see github.com/badi/guamps.git/issues/37
+### and github.com/badi/guamps.git/pulls/38
+set(LinkType STATIC)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+# -static is not supported on darwin
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_EXE_LINKER_FLAGS)
+else()
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
+  list(APPEND LinkLibs m pthread dl)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)
+message(INFO " linker flags:  ${CMAKE_EXE_LINKER_FLAGS}")
+message(INFO " linker libs:   ${LinkLibs}")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # use C99 standard
@@ -15,20 +38,11 @@ set(CMAKE_C_FLAGS "-std=c99")
 # debugging
 set(CMAKE_C_FLAGS_DEBUG "-g3 -O0")
 
-# find external dependencies
-find_package(GROMACS COMPONENTS libgmx REQUIRED)
 include_directories(${GROMACS_INCLUDE_DIR})
 set(LIBS ${LIBS} ${GROMACS_LIBRARIES})
 
 # make sure the compiler can find header files for guamps
 include_directories(include)
-
-# static linking works on OS X but not Linux at the moment
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(LinkType STATIC)
-else()
-    set(LinkType SHARED)
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # recurese in the the subdirectories
 add_subdirectory(include)
