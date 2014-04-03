@@ -11,6 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/bin)
 # find_package(GROMACS COMPONENTS libgmx REQUIRED)
 set(GROMACS_LIBRARY "GROMACS_LIBRARY-NOT_FOUND" CACHE FILEPATH "path/to/libgmx.a")
 set(GROMACS_INCLUDE_DIR "GROMACS_INCLUDE_DIR-NOT_FOUND" CACHE FILEPATH "path/to/include")
+set(LinkLibs ${GROMACS_LIBRARY})
 
 ### statically link to libraries.
 ### The mechanism is hacked together
@@ -21,10 +22,9 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 # -static is not supported on darwin
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_EXE_LINKER_FLAGS)
-  set(LinkLibs)
 else()
-  set(CMAKE_EXE_LINKER_FLAGS "-static")
-  set(LinkLibs m pthread dl)
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
+  list(APPEND LinkLibs m pthread dl)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)
 message(INFO " linker flags:  ${CMAKE_EXE_LINKER_FLAGS}")
