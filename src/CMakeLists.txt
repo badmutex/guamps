@@ -8,8 +8,8 @@ SET_TARGET_PROPERTIES(guamps_get PROPERTIES LINK_SEARCH_START_STATIC 1)
 SET_TARGET_PROPERTIES(guamps_get PROPERTIES LINK_SEARCH_END_STATIC 1)
 # SET_TARGET_PROPERTIES(guamps_set PROPERTIES LINK_SEARCH_START_STATIC 1)
 # SET_TARGET_PROPERTIES(guamps_set PROPERTIES LINK_SEARCH_END_STATIC 1)
-target_link_libraries (guamps_get guamps ${GROMACS_LIBRARY} m pthread dl)
-target_link_libraries (guamps_set guamps ${GROMACS_LIBRARY} m pthread dl)
+target_link_libraries (guamps_get guamps ${GROMACS_LIBRARY} ${LinkLibs})
+target_link_libraries (guamps_set guamps ${GROMACS_LIBRARY} ${LinkLibs})
 
 # destinations
 install(TARGETS guamps_get guamps_set DESTINATION bin)

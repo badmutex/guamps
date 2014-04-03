@@ -7,10 +7,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY, ${CMAKE_BINARY_DIR}/bin)
 
-SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-SET(CMAKE_EXE_LINKER_FLAGS "-static")
+### statically link to libraries.
+### The mechanism is hacked together
+### see github.com/badi/guamps.git/issues/37
+### and github.com/badi/guamps.git/pulls/38
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+# -static is not supported on darwin
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_EXE_LINKER_FLAGS)
+  set(LinkLibs)
+else()
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(LinkLibs "m pthread dl")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)
-
+message(INFO " linker flags: " ${CMAKE_EXE_LINKER_FLAGS})
+message(INFO " linker libs:  " ${LinkLibs})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
