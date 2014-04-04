@@ -1,0 +1,40 @@
+export CMAKE_FLAGS=
+
+error() {
+    echo $@ 1>&2
+}
+
+ret() {
+    echo "$@"
+}
+
+find_gromacs_root() {
+    local mdrun=$(which mdrun)
+    local root=$(dirname $(dirname $mdrun))
+    ret $root
+}
+
+find_gromacs_library() {
+    local root=`find_gromacs_root`
+    local lib=$root/lib/libgmx.a
+    if ! test -f "$lib"; then
+	error Could not find $lib
+	return 1
+    fi
+    ret $lib
+}
+
+find_gromacs_include_dir() {
+    local root=`find_gromacs_root`
+    local inc=$root/include
+    if ! test -d $inc/gromacs; then
+	error Could not find $inc/gromacs
+	return 1
+    fi
+    ret $inc
+}
+
+
+update_cmake_flags() {
+    export CMAKE_FLAGS="-DGROMACS_LIBRARY=`find_gromacs_library` -DGROMACS_INCLUDE_DIR=`find_gromacs_include_dir` $CMAKE_FLAGS"
+}

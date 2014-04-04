@@ -1,2 +1,6 @@
+source devenv.common
+
 module load gromacs/4.5.3
 module load cmake/2.8.3
+
+update_cmake_flags
