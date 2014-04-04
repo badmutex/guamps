@@ -136,7 +136,12 @@ int main(int argc, char *argv[]) {
   if(!guamps_pick_selector(args->select, &sel)){ return 1; }
   type = guamps_selector_type(obj->kind, sel);
 
-  FILE *fh = args_file_fopen(args->input, "r");
+  FILE *fh;
+  if(!(fh = args_file_fopen(args->input, "r"))) {
+    guamps_error("Failed to open %s for reading\n", args->input);
+    return 1;
+  }
+
   if(!guamps_fread(fh, type, &data)){
     guamps_error("Cannot read data\n");
     return 1;
