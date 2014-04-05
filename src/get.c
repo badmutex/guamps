@@ -126,7 +126,15 @@ int main(int argc, char *argv[]){
     return 1;
   }
 
-  FILE *fh = args_file_fopen(args->output, "w");
-  guamps_fwrite(fh, &data);
+  FILE *fh;
+  if(!(fh = args_file_fopen(args->output, "w"))) {
+    guamps_error("Failed to open %s for writing\n", args->output);
+    return 1;
+  }
+
+  if(!guamps_fwrite(fh, &data)) {
+    guamps_error("Failed to write data to %s\n", args->output);
+    return 1;
+  }
 
 }
