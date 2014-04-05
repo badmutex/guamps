@@ -72,7 +72,7 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
       args->file = strdup(optarg);
       break;
     case 's':
-      args->select = strdup(optart);
+      args->select = strdup(optarg);
       break;
     case 'o':
       args->output->type = FILETYPE_PATH;
