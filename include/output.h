@@ -11,6 +11,8 @@ typedef struct {
   bool should_close;
 } args_file_t;
 
+args_file_t* new_args_file_t();
+
 void guamps_error(const char *str, ...);
 void guamps_warn(const char *str, ...);
 
