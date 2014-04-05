@@ -1,3 +1,5 @@
+export PATH=$PWD/build/src:$PATH
+
 export CMAKE_FLAGS=
 
 error() {

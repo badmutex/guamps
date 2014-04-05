@@ -79,22 +79,18 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
     switch(c) {
     case 'f':
-      args->file = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->file, optarg);
+      args->file = strdup(optarg);
       args->output = args->file;
       break;
     case 's':
-      args->select = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->select, optarg);
+      args->select = strdup(optarg);
       break;
     case 'i':
       args->input->type = FILETYPE_PATH;
-      args->input->file.path = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->input->file.path, optarg);
+      args->input->file.path = strdup(optarg);
       break;
     case 'o':
-      args->output = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->output, optarg);
+      args->output = strdup(optarg);
       break;
     case 'O':
       args->overwrite = true;
@@ -136,7 +132,12 @@ int main(int argc, char *argv[]) {
   if(!guamps_pick_selector(args->select, &sel)){ return 1; }
   type = guamps_selector_type(obj->kind, sel);
 
-  FILE *fh = args_file_fopen(args->input, "r");
+  FILE *fh;
+  if(!(fh = args_file_fopen(args->input, "r"))) {
+    guamps_error("Failed to open %s for reading\n", args->input);
+    return 1;
+  }
+
   if(!guamps_fread(fh, type, &data)){
     guamps_error("Cannot read data\n");
     return 1;

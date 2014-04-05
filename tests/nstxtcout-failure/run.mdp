@@ -1,0 +1,42 @@
+integrator	= sd
+ld_seed		= -1
+dt		= 0.001            ; timestep in ps
+nsteps		= 200000000        ; 200000000 * 0.001 ps = 200 ns
+comm_mode	= Angular
+
+; temperature control
+
+tc-grps		= Protein
+ref_t		= 300.
+tau_t 		= 0.01098901098901098901 ; inverse friction constant in ps (= 1/91)
+
+; do not generate initial velocities
+gen_vel	   	= no
+
+; Output control
+nstfout         = 10000000
+nstenergy	= 10000000
+nstxout		= 10000000         ; output coordinates every 10 ns to trr file
+nstvout		= 10000000         ; output velocities every 10 ns to trr file
+;nstxtcout	= 1000  	   ; output coordinates every 1 ps to xtc file
+nstlog		= 1000000	   
+energygrps      = Protein
+
+; interactions
+
+ns_type		= simple
+nstlist		= 0
+rlist		= 0
+pbc		= no
+constraints	= none
+
+vdwtype		= Cut-off
+rvdw		= 0
+coulombtype	= Cut-off
+rcoulomb	= 0
+
+; implicit solvent
+
+implicit_solvent = GBSA
+gb_algorithm	 = OBC
+rgbradii	 = 0
