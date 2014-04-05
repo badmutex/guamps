@@ -79,22 +79,26 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
     switch(c) {
     case 'f':
-      args->file = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->file, optarg);
+      /* args->file = (char *)malloc(strlen(optarg)*sizeof(char)); */
+      args->file = strdup(optarg);
+      /* strcpy(args->file, optarg); */
       args->output = args->file;
       break;
     case 's':
-      args->select = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->select, optarg);
+      /* args->select = (char *)malloc(strlen(optarg)*sizeof(char)); */
+      /* strcpy(args->select, optarg); */
+      args->select = strdup(optarg);
       break;
     case 'i':
       args->input->type = FILETYPE_PATH;
-      args->input->file.path = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->input->file.path, optarg);
+      /* args->input->file.path = (char *)malloc(strlen(optarg)*sizeof(char)); */
+      /* strcpy(args->input->file.path, optarg); */
+      args->input->file.path = strdup(optarg);
       break;
     case 'o':
-      args->output = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->output, optarg);
+      /* args->output = (char *)malloc(strlen(optarg)*sizeof(char)); */
+      /* strcpy(args->output, optarg); */
+      args->output = strdup(optarg);
       break;
     case 'O':
       args->overwrite = true;
