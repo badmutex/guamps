@@ -24,7 +24,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_EXE_LINKER_FLAGS)
 else()
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
-  list(APPEND LinkLibs m pthread dl)
+  # mcheck is a hack.
+  # without it, there are occasional glibc malloc memory corruption errors
+  # see github.com/badi/guamps.git/issues/36
+  list(APPEND LinkLibs m pthread dl mcheck)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)
 message(INFO " linker flags:  ${CMAKE_EXE_LINKER_FLAGS}")
