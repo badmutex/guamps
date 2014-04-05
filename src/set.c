@@ -14,6 +14,12 @@ typedef struct {
   bool overwrite;
 } arguments_t;
 
+arguments_t* new_arguments_t() {
+  arguments_t *a = (arguments_t*)calloc(1, sizeof(arguments_t));
+  a->input = new_args_file_t();
+  return a;
+}
+
 static struct option options[] = {
   {"file",   required_argument, 0,  'f' },
   {"select", required_argument, 0,  's' },
@@ -61,7 +67,7 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
   if (argc <= 1) { return NULL; }
 
-  arguments_t *args = (arguments_t *)malloc(sizeof(arguments_t));
+  arguments_t *args = new_args_file_t(); //(arguments_t *)malloc(sizeof(arguments_t));
   args->input = (args_file_t *)malloc(sizeof(args_file_t));
 
   /* defaults */

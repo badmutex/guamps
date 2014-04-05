@@ -15,6 +15,12 @@ typedef struct {
   args_file_t *output;
 } arguments_t;
 
+arguments_t* new_arguments_t() {
+  arguments_t *a = (arguments_t*)calloc(1, sizeof(arguments_t));
+  a->output = new_args_file_t();
+  return a;
+}
+
 static struct option options[] = {
   {"file",   required_argument, 0,  'f' },
   {"select", required_argument, 0,  's' },

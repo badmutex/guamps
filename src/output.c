@@ -6,6 +6,12 @@
 #include "stdarg.h"
 #include <ctype.h>
 
+args_file_t* new_args_file_t(){
+  args_file_t *ft;
+  ft = (args_file_t*)calloc(1, sizeof(args_file_t));
+  return ft;
+}
+
 static void vguamps_msg_output(const char *name, const char *str, va_list args) {
   const char *extra = "[GUAMPS]";
   char *msg = (char *) calloc (strlen(extra) + strlen(name) + 3 +strlen(str), sizeof(char));
