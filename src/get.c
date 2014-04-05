@@ -69,17 +69,14 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
     switch(c) {
     case 'f':
-      args->file = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->file, optarg);
+      args->file = strdup(optarg);
       break;
     case 's':
-      args->select = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->select, optarg);
+      args->select = strdup(optart);
       break;
     case 'o':
       args->output->type = FILETYPE_PATH;
-      args->output->file.path = (char *)malloc(strlen(optarg)*sizeof(char));
-      strcpy(args->output->file.path, optarg);
+      args->output->file.path = strdup(optarg);
       break;
 
     case 'h':
