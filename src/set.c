@@ -67,7 +67,7 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
   if (argc <= 1) { return NULL; }
 
-  arguments_t *args = new_args_file_t(); //(arguments_t *)malloc(sizeof(arguments_t));
+  arguments_t *args = new_arguments_t(); //(arguments_t *)malloc(sizeof(arguments_t));
   args->input = (args_file_t *)malloc(sizeof(args_file_t));
 
   /* defaults */
