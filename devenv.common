@@ -40,3 +40,14 @@ find_gromacs_include_dir() {
 update_cmake_flags() {
     export CMAKE_FLAGS="-DGROMACS_LIBRARY=`find_gromacs_library` -DGROMACS_INCLUDE_DIR=`find_gromacs_include_dir` $CMAKE_FLAGS"
 }
+
+
+build() {
+    local buildDir=build
+    test -d $buildDir || mkdir $buildDir
+    cd $buildDir
+    test -z $CMAKE_FLAGS && update_cmake_flags
+    cmake $CMAKE_FLAGS ..
+    make
+    cd -
+}
