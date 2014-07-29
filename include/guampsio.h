@@ -12,10 +12,10 @@
 /* *********************************************************************
    Reading from GROMACS files
  ***********************************************************************/
-selectable_t *guamps_load(const char *path);
+selectable_t *guamps_load(const char *path, const unsigned long long frame);
 cpt_t * guamps_load_cpt(const char *path); // TODO
 tpr_t * guamps_load_tpr(const char *path);
-trr_t * guamps_load_trr(const char *path);
+trr_t * guamps_load_trr(const char *path, const unsigned long long frame);
 
 /* *********************************************************************
    Reading GUAMPS data
