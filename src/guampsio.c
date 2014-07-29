@@ -7,7 +7,7 @@
 /* *********************************************************************
    Reading from GROMACS files
  ***********************************************************************/
-selectable_t *guamps_load(const char *path) {
+selectable_t *guamps_load(const char *path, const unsigned long long frame) {
 
   filetype_t ftype;
   if(!guamps_pick_filetype(path, &ftype)) {
@@ -25,7 +25,7 @@ selectable_t *guamps_load(const char *path) {
     sel->data.p_tpr = *guamps_load_tpr(path);
     break;
   case TRR_F:
-    sel->data.p_trr = *guamps_load_trr(path);
+    sel->data.p_trr = *guamps_load_trr(path, frame);
     break;
   default:
     guamps_error("guamps_load: unable to load %s as %s file\n", path, ftype);
@@ -59,7 +59,7 @@ tpr_t * guamps_load_tpr(const char *path) {
 
 }
 
-trr_t * guamps_load_trr(const char *path) {
+trr_t * guamps_load_trr(const char *path, const unsigned long long int frame) {
   trr_t *trr;
 
   t_trnheader h;
@@ -69,8 +69,11 @@ trr_t * guamps_load_trr(const char *path) {
   t_fileio *fh = open_trn(path, "r");
   int bOK;
 
+  unsigned long long int current_frame = 0;
   while(fread_trnheader(fh, &trr->header, &bOK)) {
     fread_htrn(fh, &trr->header, (rvec *)&trr->box, trr->x, trr->v, trr->f);
+    if (current_frame == frame) { break; }
+    current_frame += 1;
   }
 
   close_trn(fh);
@@ -301,7 +304,7 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   return ret;
 }
 
-bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res) {
+bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res ) {
 
   bool ok = true;
   res->type = guamps_selector_type(TRR_F, sel);

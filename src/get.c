@@ -6,6 +6,7 @@
 #include "stdbool.h"
 #include <getopt.h>
 #include <ctype.h>
+#include <limits.h>
 #include <string.h>
 
 
@@ -13,11 +14,14 @@ typedef struct {
   char *file;
   char *select;
   args_file_t *output;
+  unsigned long long *index;
 } arguments_t;
 
 arguments_t* new_arguments_t() {
   arguments_t *a = (arguments_t*)calloc(1, sizeof(arguments_t));
   a->output = new_args_file_t();
+  a->index  = (unsigned long long*)calloc(1, sizeof(int));
+  *a->index = ULLONG_MAX;
   return a;
 }
 
@@ -25,6 +29,7 @@ static struct option options[] = {
   {"file",   required_argument, 0,  'f' },
   {"select", required_argument, 0,  's' },
   {"output", optional_argument, 0,  'o' },
+  {"index",  optional_argument, 0,  'i' },
 };
 
 void print_usage(FILE *stream, char *progname) {
@@ -43,6 +48,12 @@ void print_usage(FILE *stream, char *progname) {
 	  );
   fprint_enum(GUAMPS_SELECTOR_NAMES, selector_t_count, 35, stream);
 
+  // -i/--index
+  fprintf(stream,
+	  "    -i  --index               If a trajectory file, choose the `i-th` frame.\n");
+  fprintf(stream,
+	  "                              A negative value (default) means choose the last frame\n");
+
   // -o/--output
   fprintf(stream,
 	  "    -o  --output FILE         Optional. If given, write the output to this file.\n");
@@ -58,7 +69,7 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
 
   if (argc <= 1) { return NULL; }
 
-  arguments_t *args = (arguments_t *)malloc(sizeof(arguments_t));
+  arguments_t *args = new_arguments_t(); //(arguments_t *)malloc(sizeof(arguments_t));
   args->output = (args_file_t *)malloc(sizeof(args_file_t));
 
   /* defaults */
@@ -69,7 +80,7 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
   while (true) {
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "f:s:o:h?", options, &option_index);
+    int c = getopt_long(argc, argv, "f:s:i:o:h?", options, &option_index);
 
     if(c == -1) break;
 
@@ -79,6 +90,9 @@ arguments_t * parse_opts(int argc, char *argv[], struct option options[]){
       break;
     case 's':
       args->select = strdup(optarg);
+      break;
+    case 'i':
+      sscanf(strdup(optarg), "%lld", args->index);
       break;
     case 'o':
       args->output->type = FILETYPE_PATH;
@@ -123,7 +137,7 @@ int main(int argc, char *argv[]){
   data_t data;
   selectable_t *sel;
 
-  if(!(sel = guamps_load(args->file))) {
+  if(!(sel = guamps_load(args->file, *args->index))) {
     guamps_error("%s: failed to load %s\n", progname, args->file);
     return 1;
   }
