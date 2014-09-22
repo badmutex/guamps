@@ -12,6 +12,7 @@ typedef enum {
   NSTXTCOUT,
   STEP,
   TIME,
+  TAU_T,
   selector_t_LAST
 } selector_t;
 static const int selector_t_count = selector_t_LAST;
@@ -25,6 +26,7 @@ static const char *GUAMPS_SELECTOR_NAMES[] =
    [NSTXTCOUT]="NSTXTCOUT",
    [STEP]="STEP",
    [TIME]="TIME",
+   [TAU_T]="TAU_T"
   };
 
 static const type_t GUAMPS_SELECTOR_TYPES[] =
@@ -35,6 +37,7 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [DELTAT]=DOUBLE_T,
    [NSTXTCOUT]=INT_T,
    [STEP]=INT_T,
+   [TAU_T]=RVEC_T
   };
 
 type_t guamps_selector_type(const filetype_t, const selector_t);
