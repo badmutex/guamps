@@ -245,7 +245,7 @@ bool guamps_fread_array(FILE* fh, array_t* array) {
   *array = *guamps_array_create(length, type);
 
   // empty line
-  if (fgets(buffer, buffer_size, fh) == NULL) { perror("Error clearing empty line"); return NULL; }
+  if (fgets(buffer, buffer_size, fh) == false) { perror("Error clearing empty line"); return false; }
 
   void* elem = guamps_calloc_simple(type);
   // read the remaining lines
