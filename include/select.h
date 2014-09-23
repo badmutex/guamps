@@ -37,7 +37,7 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [DELTAT]=DOUBLE_T,
    [NSTXTCOUT]=INT_T,
    [STEP]=INT_T,
-   [REF_T]=RVEC_T
+   [REF_T]=ARRAY_T
   };
 
 
