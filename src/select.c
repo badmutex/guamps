@@ -2,7 +2,7 @@
 #include "select.h"
 
 
-const selector_t* guamps_selector_t_create(const selector_key key, const index_t* index) {
+selector_t* guamps_selector_t_create(const selector_key key, const index_t* index) {
   selector_t* sel = (selector_t*)calloc(sizeof(selector_t), 1);
   sel->key = (selector_key)key;
   sel->index = (unsigned long long*)index;

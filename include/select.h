@@ -52,7 +52,7 @@ typedef struct {
   index_t* index;
 } selector_t;
 
-const selector_t* guamps_selector_t_create(const selector_key key, const index_t* index);
+selector_t* guamps_selector_t_create(const selector_key key, const index_t* index);
 
 type_t guamps_selector_type(const filetype_t, const selector_t);
 
