@@ -129,6 +129,7 @@ bool guamps_fread_scalar_type(FILE* fh, const type_t type, void* value) {
     guamps_error("guamps_fread_scalar_type: Failed to read scalar\n");
     return false;
   }
+  return true;
 }
 
 bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
