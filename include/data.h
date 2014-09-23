@@ -14,7 +14,7 @@
 
 typedef enum {
   INT_T, LLINT_T, FLOAT_T, DOUBLE_T, REAL_T, // scalar
-  RVEC_T, // vectors
+  RVEC_T, // gromacs 3D vectors
   MATRIX_T, // gmx matrix
 } type_t;
 
