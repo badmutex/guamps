@@ -148,6 +148,6 @@ test-array() {
     test $? -eq 0 && echo OK || fail
 
     echo -n "    set..."
-
+    gset $IN_TPR $OUT_TPR $sel out.gps >out.log 2>&1
     test $? -eq 0 && echo OK || fail
 }
