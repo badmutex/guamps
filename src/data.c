@@ -158,6 +158,10 @@ void * guamps_data_get(const data_t *data) {
     return (void *)&data->value.v_matrix;
     break;
 
+  case ARRAY_T:
+    return data->value.v_array.array;
+    break;
+
   }
 
 }

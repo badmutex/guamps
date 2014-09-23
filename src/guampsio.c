@@ -242,9 +242,7 @@ bool guamps_fread_array(FILE* fh, array_t* array) {
       !guamps_read_vector_header("type", buffer, buffer_size, fh, "type: %d", &type, 1))
     { return false; }
 
-  /* type_t* type = GUAMPS_TYPE(elem_type); */
-
-  array = guamps_array_create(length, type);
+  *array = *guamps_array_create(length, type);
 
   // empty line
   if (fgets(buffer, buffer_size, fh) == NULL) { perror("Error clearing empty line"); return NULL; }
@@ -469,6 +467,9 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     break;
   case NSTXTCOUT:
     tpr->inputrec.nstxtcout = *(int*)guamps_data_get(new);
+    break;
+  case REF_T:
+    tpr->inputrec.opts.ref_t = guamps_data_get(new);
     break;
   default:
     guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel.key]);
