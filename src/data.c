@@ -94,8 +94,8 @@ void * guamps_data_get(const data_t *data) {
 
 void * guamps_array_get(const array_t* array, const int i) {
   switch (array->type) {
-  case INT_T:
-    return ((int*)array->array)[i];
+  case REAL_T:
+    return &((real*)array->array)[i];
     break;
 
   default:
