@@ -554,10 +554,13 @@ bool guamps_fwrite_scalar_generic(FILE *fh, const type_t type, const void* value
     fprintf(fh, "%d\n", *(int*)value); break;
   case LLINT_T:
     fprintf(fh, "%lld\n", *(long long int*)value); break;
+
   case FLOAT_T:
     fprintf(fh, "%f\n", *(float*)value); break;
   case DOUBLE_T:
     fprintf(fh, "%f\n", *(double*)value); break;
+  case REAL_T:
+    fprintf(fh, "%f\n", *(real*)value); break;
   default:
     guamps_error("guamps_fwrite_scalar_generic: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[type]);
     return false;
