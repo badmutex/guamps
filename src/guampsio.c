@@ -295,6 +295,11 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   case NSTXTCOUT:
     guamps_data_set(res->type, &tpr->inputrec.nstxtcout, res);
     break;
+  case REF_T:
+    res->value.v_array.length = tpr->inputrec.opts.ngtc;
+    res->value.v_array.type   = REAL_T;
+    res->value.v_array.array  = tpr->inputrec.opts.ref_t;
+    break;
   default:
     guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ret = false;
