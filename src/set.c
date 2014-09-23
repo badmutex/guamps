@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   selectable_t *obj;
   type_t type;
 
-  obj = guamps_load(args->file, -1); // TODO: set trajectory at index
+  obj = guamps_load(args->file, args->index); // TODO: set trajectory at index
   if(!(sel = guamps_pick_selector(args->select, args->index))){ return 1; }
   type = guamps_selector_type(obj->kind, *sel);
 
