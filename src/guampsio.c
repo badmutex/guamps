@@ -250,7 +250,7 @@ bool guamps_fread_array(FILE* fh, array_t* array) {
   void* elem = guamps_calloc_simple(type);
   // read the remaining lines
   for (int i=0; i<array->length; i++) {
-    guamps_fread_scalar_type(fh, type, elem);
+    if (!guamps_fread_scalar_type(fh, type, elem)){ return false; }
     guamps_array_set(array, i, elem);
   }
 
