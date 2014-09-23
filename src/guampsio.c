@@ -617,6 +617,7 @@ selector_t* guamps_pick_selector(const char *str, const index_t* index) {
   else if (0 == strcmp(str, "deltat")) { key = DELTAT;  }
   else if (0 == strcmp(str, "nstxtcout")){key= NSTXTCOUT;}
   else if (0 == strcmp(str, "step"))   {key= STEP;}
+  else if (0 == strcmp(str, "ref_t"))  {key  = REF_T;   }
   else {
     guamps_error("guamps_pick_selector: unknown option: %s\n", str);
     return NULL;
