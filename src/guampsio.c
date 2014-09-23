@@ -7,7 +7,7 @@
 /* *********************************************************************
    Reading from GROMACS files
  ***********************************************************************/
-selectable_t *guamps_load(const char *path, const unsigned long long frame) {
+selectable_t *guamps_load(const char *path, const index_t* frame) {
 
   filetype_t ftype;
   if(!guamps_pick_filetype(path, &ftype)) {
@@ -59,7 +59,7 @@ tpr_t * guamps_load_tpr(const char *path) {
 
 }
 
-trr_t * guamps_load_trr(const char *path, const unsigned long long int frame) {
+trr_t * guamps_load_trr(const char *path, const index_t* frame) {
   trr_t *trr;
 
   t_trnheader h;
@@ -72,7 +72,7 @@ trr_t * guamps_load_trr(const char *path, const unsigned long long int frame) {
   unsigned long long int current_frame = 0;
   while(fread_trnheader(fh, &trr->header, &bOK)) {
     fread_htrn(fh, &trr->header, (rvec *)&trr->box, trr->x, trr->v, trr->f);
-    if (current_frame == frame) { break; }
+    if (frame && current_frame == *frame) { break; }
     current_frame += 1;
   }
 
@@ -106,6 +106,9 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
   case RVEC_T:
     ok = guamps_fread_rvec(fh, &data->value.v_rvec);
     break;
+  case ARRAY_T:
+    ok = guamps_fread_array(fh, &data->value.v_array);
+    break;
   default:
     guamps_error("guamps_fread: unknown type: %s\n", GUAMPS_TYPE_NAMES[type]);
     ok = false;
@@ -113,6 +116,20 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
   }
 
   return ok;
+}
+
+bool guamps_fread_scalar_type(FILE* fh, const type_t type, void* value) {
+  char *fmt;
+  if (!(fmt = guamps_type_format(type))) {
+    guamps_error("guamps_fread_scalar: Bad type! Scalars should be simple types.\n");
+    return false;
+  }
+
+  if (!guamps_fread_scalar(fh, fmt, value)) {
+    guamps_error("guamps_fread_scalar_type: Failed to read scalar\n");
+    return false;
+  }
+  return true;
 }
 
 bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
@@ -211,6 +228,35 @@ bool guamps_fread_rvec(FILE *fh, rvec_t *value) {
   return true;
 }
 
+bool guamps_fread_array(FILE* fh, array_t* array) {
+
+  int length;
+  type_t type;
+
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  // header values: length
+  if (
+      !guamps_read_vector_header("length", buffer, buffer_size, fh, "length: %d", &length, 1)
+      ||
+      !guamps_read_vector_header("type", buffer, buffer_size, fh, "type: %d", &type, 1))
+    { return false; }
+
+  *array = *guamps_array_create(length, type);
+
+  // empty line
+  if (fgets(buffer, buffer_size, fh) == false) { perror("Error clearing empty line"); return false; }
+
+  void* elem = guamps_calloc_simple(type);
+  // read the remaining lines
+  for (int i=0; i<array->length; i++) {
+    if (!guamps_fread_scalar_type(fh, type, elem)){ return false; }
+    guamps_array_set(array, i, elem);
+  }
+
+}
+
 /* *********************************************************************
    Extracting data
  ***********************************************************************/
@@ -231,9 +277,9 @@ bool guamps_select    (const selectable_t *data, const selector_t sel, data_t *r
 bool guamps_select_cpt(const cpt_t *cpt , const selector_t sel, data_t *res) {
   bool ok = true;
 
-  switch(sel) {
+  switch(sel.key) {
   default:
-    guamps_error("guamps_select_cpt: unknown selector %s for CPT file\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_cpt: unknown selector %s for CPT file\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
   }
 
@@ -245,7 +291,7 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   int ret = true;
   res->type = guamps_selector_type(TPR_F, sel);
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     guamps_data_set(res->type, (void*)&tpr->natoms, res);
     break;
@@ -295,8 +341,13 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   case NSTXTCOUT:
     guamps_data_set(res->type, &tpr->inputrec.nstxtcout, res);
     break;
+  case REF_T:
+    res->value.v_array.length = tpr->inputrec.opts.ngtc;
+    res->value.v_array.type   = REAL_T;
+    res->value.v_array.array  = tpr->inputrec.opts.ref_t;
+    break;
   default:
-    guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ret = false;
     break;
   }
@@ -310,7 +361,7 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res ) {
   res->type = guamps_selector_type(TRR_F, sel);
   rvec_t vec;
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     guamps_data_set(res->type, &trr->header.natoms, res);
     break;
@@ -339,7 +390,7 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res ) {
     guamps_data_set(res->type, &trr->header.t, res);
     break;
   default:
-    guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -372,7 +423,7 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
      2. add the appropriate cast
    */
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     tpr->state.natoms = *(int*)guamps_data_get(new);
     break;
@@ -418,8 +469,11 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
   case NSTXTCOUT:
     tpr->inputrec.nstxtcout = *(int*)guamps_data_get(new);
     break;
+  case REF_T:
+    tpr->inputrec.opts.ref_t = guamps_data_get(new);
+    break;
   default:
-    guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -432,7 +486,7 @@ bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
   bool ok = true;
   rvec_t vec;
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     trr->header.natoms = *(int*)guamps_data_get(new);
     break;
@@ -462,7 +516,7 @@ bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
     trr->header.step = *(int*)guamps_data_get(new);
     break;
   default:
-    guamps_error("guamps_update_trr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_update_trr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -497,6 +551,9 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
     break;
   case MATRIX_T:
     return guamps_fwrite_rvec(fh, data->value.v_matrix, 3);
+    break;
+  case ARRAY_T:
+    return guamps_fwrite_array(fh, &data->value.v_array);
     break;
   case INT_T:
   case LLINT_T:
@@ -545,23 +602,29 @@ bool guamps_write_trr(const char *path, const trr_t *trr) {
 
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
 
-bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
-  char *fmt;
-  switch(data->type) {
+bool guamps_fwrite_scalar_generic(FILE *fh, const type_t type, const void* value) {
+  switch(type) {
   case INT_T:
-    fprintf(fh, "%d\n", data->value.v_int); break;
+    fprintf(fh, "%d\n", *(int*)value); break;
   case LLINT_T:
-    fprintf(fh, "%lld\n", data->value.v_llint); break;
+    fprintf(fh, "%lld\n", *(long long int*)value); break;
+
   case FLOAT_T:
-    fprintf(fh, "%f\n", data->value.v_float); break;
+    fprintf(fh, "%f\n", *(float*)value); break;
   case DOUBLE_T:
-    fprintf(fh, "%f\n", data->value.v_double); break;
+    fprintf(fh, "%f\n", *(double*)value); break;
+  case REAL_T:
+    fprintf(fh, "%f\n", *(real*)value); break;
   default:
-    guamps_error("guamps_write_scalar: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[data->type]);
+    guamps_error("guamps_fwrite_scalar_generic: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[type]);
     return false;
     break;
   }
   return true;
+}
+
+bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
+  return guamps_fwrite_scalar_generic(fh, data->type, guamps_data_get(data));
 }
 
 bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
@@ -587,40 +650,54 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
   return true;
 }
 
+bool guamps_fwrite_array(FILE *fh, const array_t* array) {
+
+  fprintf(fh, "length: %d\n", array->length);
+  fprintf(fh, "type: %d\n", array->type);
+  fprintf(fh, "\n");
+
+  for (int i=0; i<array->length; i++) {
+    guamps_fwrite_scalar_generic(fh, array->type, guamps_array_get(array, i));
+  }
+
+}
+
 
 
 /* *********************************************************************
    Parsing selection string from user
  ***********************************************************************/
-bool guamps_pick_selector(const char *str, selector_t *sel) {
+selector_t* guamps_pick_selector(const char *str, const index_t* index) {
+  selector_key key;
   if (0 == strcmp(str, "natoms")) {
-    *sel = NATOMS; }
+    key = NATOMS; }
   else if (0 == strcmp(str, "positions")) {
-    *sel = POSITIONS; }
+    key = POSITIONS; }
   else if (0 == strcmp(str, "velocities")) {
-    *sel = VELOCITIES; }
+    key = VELOCITIES; }
   else if (0 == strcmp(str, "forces")) {
-    *sel = FORCES; }
+    key = FORCES; }
   else if (0 == strcmp(str, "lambda")) {
-    *sel = LAMBDA; }
+    key = LAMBDA; }
   else if (0 == strcmp(str, "box")) {
-    *sel = BOX; }
-  else if (0 == strcmp(str, "time")) { *sel = TIME; }
+    key = BOX; }
+  else if (0 == strcmp(str, "time")) { key = TIME; }
   // RNG not supported
-  else if (0 == strcmp(str, "nstlog")) { *sel = NSTLOG; }
-  else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
-  else if (0 == strcmp(str, "nstvout")){ *sel = NSTVOUT; }
-  else if (0 == strcmp(str, "nstfout")){ *sel = NSTFOUT; }
-  else if (0 == strcmp(str, "nsteps")) { *sel = NSTEPS;  }
-  else if (0 == strcmp(str, "ld_seed")){ *sel = LD_SEED; }
-  else if (0 == strcmp(str, "deltat")) { *sel = DELTAT;  }
-  else if (0 == strcmp(str, "nstxtcout")){*sel= NSTXTCOUT;}
-  else if (0 == strcmp(str, "step"))   {*sel= STEP;}
+  else if (0 == strcmp(str, "nstlog")) { key = NSTLOG; }
+  else if (0 == strcmp(str, "nstxout")){ key = NSTXOUT; }
+  else if (0 == strcmp(str, "nstvout")){ key = NSTVOUT; }
+  else if (0 == strcmp(str, "nstfout")){ key = NSTFOUT; }
+  else if (0 == strcmp(str, "nsteps")) { key = NSTEPS;  }
+  else if (0 == strcmp(str, "ld_seed")){ key = LD_SEED; }
+  else if (0 == strcmp(str, "deltat")) { key = DELTAT;  }
+  else if (0 == strcmp(str, "nstxtcout")){key= NSTXTCOUT;}
+  else if (0 == strcmp(str, "step"))   {key= STEP;}
+  else if (0 == strcmp(str, "ref_t"))  {key  = REF_T;   }
   else {
     guamps_error("guamps_pick_selector: unknown option: %s\n", str);
-    return false;
+    return NULL;
   }
-  return true;
+  return guamps_selector_t_create(key, index);
 }
 
 bool guamps_pick_filetype(const char *path, filetype_t *ftype) {

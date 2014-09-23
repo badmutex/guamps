@@ -12,9 +12,10 @@ typedef enum {
   NSTXTCOUT,
   STEP,
   TIME,
-  selector_t_LAST
-} selector_t;
-static const int selector_t_count = selector_t_LAST;
+  REF_T,
+  selector_key_LAST
+} selector_key;
+static const int selector_key_count = selector_key_LAST;
 
 static const char *GUAMPS_SELECTOR_NAMES[] =
   {[NATOMS]="NATOMS", [POSITIONS]="POSITIONS", [VELOCITIES]="VELOCITIES",
@@ -25,6 +26,7 @@ static const char *GUAMPS_SELECTOR_NAMES[] =
    [NSTXTCOUT]="NSTXTCOUT",
    [STEP]="STEP",
    [TIME]="TIME",
+   [REF_T]="REF_T"
   };
 
 static const type_t GUAMPS_SELECTOR_TYPES[] =
@@ -35,7 +37,22 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [DELTAT]=DOUBLE_T,
    [NSTXTCOUT]=INT_T,
    [STEP]=INT_T,
+   [REF_T]=ARRAY_T
   };
+
+static const type_t GUAMPS_SELECTOR_ARRAY_TYPES[] = {
+  [REF_T]=REAL_T,
+};
+
+
+typedef unsigned long long index_t;
+
+typedef struct {
+  selector_key key;
+  index_t* index;
+} selector_t;
+
+selector_t* guamps_selector_t_create(const selector_key key, const index_t* index);
 
 type_t guamps_selector_type(const filetype_t, const selector_t);
 
