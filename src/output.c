@@ -14,7 +14,7 @@ args_file_t* new_args_file_t(){
 
 static void vguamps_msg_output(const char *name, const char *str, va_list args) {
   const char *extra = "[GUAMPS]";
-  char *msg = (char *) calloc (strlen(extra) + strlen(name) + 3 +strlen(str), sizeof(char));
+  char *msg = (char *) calloc (strlen(extra) + strlen(name) + 4 +strlen(str), sizeof(char));
   strcat(msg, extra);
   strcat(msg, " ");
   strcat(msg, name);
