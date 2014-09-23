@@ -13,9 +13,9 @@ typedef enum {
   STEP,
   TIME,
   TAU_T,
-  selector_t_LAST
-} selector_t;
-static const int selector_t_count = selector_t_LAST;
+  selector_key_LAST
+} selector_key;
+static const int selector_key_count = selector_key_LAST;
 
 static const char *GUAMPS_SELECTOR_NAMES[] =
   {[NATOMS]="NATOMS", [POSITIONS]="POSITIONS", [VELOCITIES]="VELOCITIES",
@@ -39,6 +39,16 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [STEP]=INT_T,
    [TAU_T]=RVEC_T
   };
+
+
+typedef unsigned long long index_t;
+
+typedef struct {
+  selector_key key;
+  index_t* index;
+} selector_t;
+
+const selector_t* guamps_selector_t_create(const selector_key key, const index_t* index);
 
 type_t guamps_selector_type(const filetype_t, const selector_t);
 

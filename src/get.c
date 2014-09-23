@@ -14,14 +14,13 @@ typedef struct {
   char *file;
   char *select;
   args_file_t *output;
-  unsigned long long *index;
+  index_t* index;
 } arguments_t;
 
 arguments_t* new_arguments_t() {
   arguments_t *a = (arguments_t*)calloc(1, sizeof(arguments_t));
   a->output = new_args_file_t();
-  a->index  = (unsigned long long*)calloc(1, sizeof(int));
-  *a->index = ULLONG_MAX;
+  a->index  = NULL;
   return a;
 }
 
@@ -46,7 +45,7 @@ void print_usage(FILE *stream, char *progname) {
   fprintf(stream,
 	  "    -s  --select              Select this from the FILE. Options are:\n"
 	  );
-  fprint_enum(GUAMPS_SELECTOR_NAMES, selector_t_count, 35, stream);
+  fprint_enum(GUAMPS_SELECTOR_NAMES, selector_key_count, 35, stream);
 
   // -i/--index
   fprintf(stream,
@@ -127,9 +126,9 @@ int main(int argc, char *argv[]){
   }
 
   data_t r;
-  selector_t selector;
+  selector_t* selector;
 
-  if (!guamps_pick_selector(args->select, &selector)) {
+  if (!(selector = guamps_pick_selector(args->select, args->index))) {
     fprintf(stderr, "Unknown selection: %s\n", args->select);
     return 1;
   }
@@ -137,12 +136,12 @@ int main(int argc, char *argv[]){
   data_t data;
   selectable_t *sel;
 
-  if(!(sel = guamps_load(args->file, *args->index))) {
+  if(!(sel = guamps_load(args->file, args->index))) {
     guamps_error("%s: failed to load %s\n", progname, args->file);
     return 1;
   }
-  if(!guamps_select(sel, selector, &data)){
-    guamps_error("%s: failed to select %s\n", progname, GUAMPS_SELECTOR_NAMES[selector]);
+  if(!guamps_select(sel, *selector, &data)){
+    guamps_error("%s: failed to select %s\n", progname, GUAMPS_SELECTOR_NAMES[selector->key]);
     return 1;
   }
 

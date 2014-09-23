@@ -12,10 +12,10 @@
 /* *********************************************************************
    Reading from GROMACS files
  ***********************************************************************/
-selectable_t *guamps_load(const char *path, const unsigned long long frame);
+selectable_t *guamps_load(const char *path, const index_t* frame);
 cpt_t * guamps_load_cpt(const char *path); // TODO
 tpr_t * guamps_load_tpr(const char *path);
-trr_t * guamps_load_trr(const char *path, const unsigned long long frame);
+trr_t * guamps_load_trr(const char *path, const index_t* frame);
 
 /* *********************************************************************
    Reading GUAMPS data
@@ -53,7 +53,7 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int count);
 /* *********************************************************************
    Parsing selection string from user
  ***********************************************************************/
-bool guamps_pick_selector(const char *str, selector_t *sel);
+selector_t* guamps_pick_selector(const char *str, const index_t* index);
 bool guamps_pick_filetype(const char *path, filetype_t *ftype);
 
 #endif

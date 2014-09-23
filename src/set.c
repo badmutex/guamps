@@ -12,6 +12,7 @@ typedef struct {
   char *output;
   args_file_t *input;
   bool overwrite;
+  unsigned long long *index;
 } arguments_t;
 
 arguments_t* new_arguments_t() {
@@ -26,6 +27,7 @@ static struct option options[] = {
   {"input",  optional_argument, 0,  'i' },
   {"output", optional_argument, 0,  'o' },
   {"overwrite", no_argument,    0,  'O' },
+  {"index",  optional_argument, 0,  'k' }
 };
 
 void print_usage(FILE *stream, char *progname) {
@@ -42,7 +44,7 @@ void print_usage(FILE *stream, char *progname) {
   fprintf(stream,
 	  "    -s  --select              Select this from the FILE. Options are:\n"
 	  );
-  fprint_enum(GUAMPS_SELECTOR_NAMES, selector_t_count, 35, stream);
+  fprint_enum(GUAMPS_SELECTOR_NAMES, selector_key_count, 35, stream);
 
   // -i/--input
   fprintf(stream,
@@ -55,6 +57,13 @@ void print_usage(FILE *stream, char *progname) {
   // -O/--overwrite
   fprintf(stream,
 	  "    -O  --overwrite           Overwrite the --file if present\n");
+
+  // -i/--index
+  fprintf(stream,
+	  "    -k  --index               If a trajectory file, choose the `k-th` frame.\n");
+  fprintf(stream,
+	  "                              A negative value (default) means choose the last frame\n");
+
 
   // -h/--help
   fprintf(stream,
@@ -130,13 +139,13 @@ int main(int argc, char *argv[]) {
   }
 
   data_t data;
-  selector_t sel;
+  selector_t* sel;
   selectable_t *obj;
   type_t type;
 
   obj = guamps_load(args->file, -1); // TODO: set trajectory at index
-  if(!guamps_pick_selector(args->select, &sel)){ return 1; }
-  type = guamps_selector_type(obj->kind, sel);
+  if(!(sel = guamps_pick_selector(args->select, args->index))){ return 1; }
+  type = guamps_selector_type(obj->kind, *sel);
 
   FILE *fh;
   if(!(fh = args_file_fopen(args->input, "r"))) {
@@ -149,7 +158,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if(!guamps_update(obj, sel, &data)){
+  if(!guamps_update(obj, *sel, &data)){
     guamps_error("Cannot update %s with new values\n", GUAMPS_FILETYPE_NAMES[obj->kind]);
     return 1;
   }

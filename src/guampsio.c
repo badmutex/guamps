@@ -7,7 +7,7 @@
 /* *********************************************************************
    Reading from GROMACS files
  ***********************************************************************/
-selectable_t *guamps_load(const char *path, const unsigned long long frame) {
+selectable_t *guamps_load(const char *path, const index_t* frame) {
 
   filetype_t ftype;
   if(!guamps_pick_filetype(path, &ftype)) {
@@ -59,7 +59,7 @@ tpr_t * guamps_load_tpr(const char *path) {
 
 }
 
-trr_t * guamps_load_trr(const char *path, const unsigned long long int frame) {
+trr_t * guamps_load_trr(const char *path, const index_t* frame) {
   trr_t *trr;
 
   t_trnheader h;
@@ -72,7 +72,7 @@ trr_t * guamps_load_trr(const char *path, const unsigned long long int frame) {
   unsigned long long int current_frame = 0;
   while(fread_trnheader(fh, &trr->header, &bOK)) {
     fread_htrn(fh, &trr->header, (rvec *)&trr->box, trr->x, trr->v, trr->f);
-    if (current_frame == frame) { break; }
+    if (frame && current_frame == frame) { break; }
     current_frame += 1;
   }
 
@@ -231,9 +231,9 @@ bool guamps_select    (const selectable_t *data, const selector_t sel, data_t *r
 bool guamps_select_cpt(const cpt_t *cpt , const selector_t sel, data_t *res) {
   bool ok = true;
 
-  switch(sel) {
+  switch(sel.key) {
   default:
-    guamps_error("guamps_select_cpt: unknown selector %s for CPT file\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_cpt: unknown selector %s for CPT file\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
   }
 
@@ -245,7 +245,7 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
   int ret = true;
   res->type = guamps_selector_type(TPR_F, sel);
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     guamps_data_set(res->type, (void*)&tpr->natoms, res);
     break;
@@ -296,7 +296,7 @@ bool guamps_select_tpr(const tpr_t *tpr , const selector_t sel, data_t *res) {
     guamps_data_set(res->type, &tpr->inputrec.nstxtcout, res);
     break;
   default:
-    guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_tpr: getting %s from tpr not supported\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ret = false;
     break;
   }
@@ -310,7 +310,7 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res ) {
   res->type = guamps_selector_type(TRR_F, sel);
   rvec_t vec;
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     guamps_data_set(res->type, &trr->header.natoms, res);
     break;
@@ -339,7 +339,7 @@ bool guamps_select_trr(const trr_t *trr , const selector_t sel, data_t *res ) {
     guamps_data_set(res->type, &trr->header.t, res);
     break;
   default:
-    guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_select_trr: cannot select %s from trr file\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -372,7 +372,7 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
      2. add the appropriate cast
    */
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     tpr->state.natoms = *(int*)guamps_data_get(new);
     break;
@@ -419,7 +419,7 @@ bool guamps_update_tpr(tpr_t *tpr, const selector_t sel, const data_t *new) {
     tpr->inputrec.nstxtcout = *(int*)guamps_data_get(new);
     break;
   default:
-    guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_update_tpr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -432,7 +432,7 @@ bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
   bool ok = true;
   rvec_t vec;
 
-  switch(sel) {
+  switch(sel.key) {
   case NATOMS:
     trr->header.natoms = *(int*)guamps_data_get(new);
     break;
@@ -462,7 +462,7 @@ bool guamps_update_trr(trr_t *trr, const selector_t sel, const data_t *new) {
     trr->header.step = *(int*)guamps_data_get(new);
     break;
   default:
-    guamps_error("guamps_update_trr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel]);
+    guamps_error("guamps_update_trr: unknown selector %s\n", GUAMPS_SELECTOR_NAMES[sel.key]);
     ok = false;
     break;
   }
@@ -592,35 +592,36 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
 /* *********************************************************************
    Parsing selection string from user
  ***********************************************************************/
-bool guamps_pick_selector(const char *str, selector_t *sel) {
+selector_t* guamps_pick_selector(const char *str, const index_t* index) {
+  selector_key key;
   if (0 == strcmp(str, "natoms")) {
-    *sel = NATOMS; }
+    key = NATOMS; }
   else if (0 == strcmp(str, "positions")) {
-    *sel = POSITIONS; }
+    key = POSITIONS; }
   else if (0 == strcmp(str, "velocities")) {
-    *sel = VELOCITIES; }
+    key = VELOCITIES; }
   else if (0 == strcmp(str, "forces")) {
-    *sel = FORCES; }
+    key = FORCES; }
   else if (0 == strcmp(str, "lambda")) {
-    *sel = LAMBDA; }
+    key = LAMBDA; }
   else if (0 == strcmp(str, "box")) {
-    *sel = BOX; }
-  else if (0 == strcmp(str, "time")) { *sel = TIME; }
+    key = BOX; }
+  else if (0 == strcmp(str, "time")) { key = TIME; }
   // RNG not supported
-  else if (0 == strcmp(str, "nstlog")) { *sel = NSTLOG; }
-  else if (0 == strcmp(str, "nstxout")){ *sel = NSTXOUT; }
-  else if (0 == strcmp(str, "nstvout")){ *sel = NSTVOUT; }
-  else if (0 == strcmp(str, "nstfout")){ *sel = NSTFOUT; }
-  else if (0 == strcmp(str, "nsteps")) { *sel = NSTEPS;  }
-  else if (0 == strcmp(str, "ld_seed")){ *sel = LD_SEED; }
-  else if (0 == strcmp(str, "deltat")) { *sel = DELTAT;  }
-  else if (0 == strcmp(str, "nstxtcout")){*sel= NSTXTCOUT;}
-  else if (0 == strcmp(str, "step"))   {*sel= STEP;}
+  else if (0 == strcmp(str, "nstlog")) { key = NSTLOG; }
+  else if (0 == strcmp(str, "nstxout")){ key = NSTXOUT; }
+  else if (0 == strcmp(str, "nstvout")){ key = NSTVOUT; }
+  else if (0 == strcmp(str, "nstfout")){ key = NSTFOUT; }
+  else if (0 == strcmp(str, "nsteps")) { key = NSTEPS;  }
+  else if (0 == strcmp(str, "ld_seed")){ key = LD_SEED; }
+  else if (0 == strcmp(str, "deltat")) { key = DELTAT;  }
+  else if (0 == strcmp(str, "nstxtcout")){key= NSTXTCOUT;}
+  else if (0 == strcmp(str, "step"))   {key= STEP;}
   else {
     guamps_error("guamps_pick_selector: unknown option: %s\n", str);
-    return false;
+    return NULL;
   }
-  return true;
+  return guamps_selector_t_create(key, index);
 }
 
 bool guamps_pick_filetype(const char *path, filetype_t *ftype) {
