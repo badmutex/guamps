@@ -498,6 +498,9 @@ bool guamps_fwrite(FILE *fh, const data_t *data) {
   case MATRIX_T:
     return guamps_fwrite_rvec(fh, data->value.v_matrix, 3);
     break;
+  case ARRAY_T:
+    return guamps_fwrite_array(fh, &data->value.v_array);
+    break;
   case INT_T:
   case LLINT_T:
   case FLOAT_T:
@@ -585,6 +588,16 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
   }
 
   return true;
+}
+
+bool guamps_fwrite_array(FILE *fh, const array_t* array) {
+
+  fprintf(fh, "length: %d\n\n", array->length);
+
+  for (int i=0; i<array->length; i++) {
+    guamps_fwrite_scalar_generic(fh, array->type, guamps_array_get(array, i));
+  }
+
 }
 
 

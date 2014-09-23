@@ -16,12 +16,14 @@ typedef enum {
   INT_T, LLINT_T, FLOAT_T, DOUBLE_T, REAL_T, // scalar
   RVEC_T, // gromacs 3D vectors
   MATRIX_T, // gmx matrix
+  ARRAY_T, // arrays
 } type_t;
 
 static const char *GUAMPS_TYPE_NAMES[] =  {
   [INT_T]="INT_T", [LLINT_T]="LLINT_T",  [FLOAT_T]="FLOAT_T", [DOUBLE_T]="DOUBLE_T", [REAL_T]="REAL_T",
   [RVEC_T]="RVEC_T",
   [MATRIX_T]="MATRIX_T",
+  [ARRAY_T]="ARRAY_T",
 };
 
 static bool typecheck(type_t a, type_t b) {
@@ -39,10 +41,17 @@ typedef struct {
   rvec *rvec;
 } rvec_t;
 
+typedef struct {
+  int length;
+  type_t type;
+  void *array;
+} array_t;
+
 typedef union {
   int v_int; long long int v_llint; float v_float; double v_double;
   rvec_t v_rvec;
   matrix v_matrix;
+  array_t v_array;
 } value_t;
 
 typedef struct {
@@ -56,6 +65,9 @@ void guamps_data_set(const type_t, const void *, data_t *);
 // Get the value of the data based on it's type_t
 // The result is returned as a (void*) so you need to cast it.
 void * guamps_data_get(const data_t*);
+
+// Index into an erased array
+void * guamps_array_get(const array_t*, const int i);
 
 
 typedef enum {

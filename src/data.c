@@ -91,3 +91,15 @@ void * guamps_data_get(const data_t *data) {
   }
 
 }
+
+void * guamps_array_get(const array_t* array, const int i) {
+  switch (array->type) {
+  case INT_T:
+    return ((int*)array->array)[i];
+    break;
+
+  default:
+    guamps_error("guamps_array_get: Unknown array type %s\n", GUAMPS_TYPE_NAMES[array->type]);
+    return NULL;
+ }
+}

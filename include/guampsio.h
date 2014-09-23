@@ -49,6 +49,7 @@ bool guamps_write_trr(const char *path, const trr_t *trr);
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
 bool guamps_fwrite_scalar(FILE *fh, const data_t *data);
 bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int count);
+bool guamps_fwrite_array(FILE *fh, const array_t* array);
 
 /* *********************************************************************
    Parsing selection string from user
