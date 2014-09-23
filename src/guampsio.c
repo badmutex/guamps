@@ -548,23 +548,26 @@ bool guamps_write_trr(const char *path, const trr_t *trr) {
 
 bool guamps_write_cpt(const char *path, const cpt_t *cpt); // TODO
 
-bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
-  char *fmt;
-  switch(data->type) {
+bool guamps_fwrite_scalar_generic(FILE *fh, const type_t type, const void* value) {
+  switch(type) {
   case INT_T:
-    fprintf(fh, "%d\n", data->value.v_int); break;
+    fprintf(fh, "%d\n", *(int*)value); break;
   case LLINT_T:
-    fprintf(fh, "%lld\n", data->value.v_llint); break;
+    fprintf(fh, "%lld\n", *(long long int*)value); break;
   case FLOAT_T:
-    fprintf(fh, "%f\n", data->value.v_float); break;
+    fprintf(fh, "%f\n", *(float*)value); break;
   case DOUBLE_T:
-    fprintf(fh, "%f\n", data->value.v_double); break;
+    fprintf(fh, "%f\n", *(double*)value); break;
   default:
-    guamps_error("guamps_write_scalar: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[data->type]);
+    guamps_error("guamps_fwrite_scalar_generic: unknown scalar type %s\n", GUAMPS_TYPE_NAMES[type]);
     return false;
     break;
   }
   return true;
+}
+
+bool guamps_fwrite_scalar(FILE *fh, const data_t *data) {
+  return guamps_fwrite_scalar_generic(fh, data->type, guamps_data_get(data));
 }
 
 bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
