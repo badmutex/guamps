@@ -21,8 +21,10 @@ trr_t * guamps_load_trr(const char *path, const index_t* frame);
    Reading GUAMPS data
  ***********************************************************************/
 bool guamps_fread(FILE *fh, const type_t type, data_t *data);
+bool guamps_fread_scalar_type(FILE* fh, const type_t type, void* value);
 bool guamps_fread_scalar(FILE *fh, const char *spec, void *value);
 bool guamps_fread_rvec(FILE *fh, rvec_t *value);
+bool guamps_fread_array(FILE *fh, array_t* array);
 
 /* *********************************************************************
    Extracting data

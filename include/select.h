@@ -40,6 +40,10 @@ static const type_t GUAMPS_SELECTOR_TYPES[] =
    [REF_T]=ARRAY_T
   };
 
+static const type_t GUAMPS_SELECTOR_ARRAY_TYPES[] = {
+  [REF_T]=REAL_T,
+};
+
 
 typedef unsigned long long index_t;
 

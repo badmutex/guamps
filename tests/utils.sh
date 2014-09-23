@@ -139,3 +139,15 @@ test-vector() {
     gset $IN_TPR $OUT_TPR $sel out.gps >out.log 2>&1
     test $? -eq 0 && echo OK || fail
 }
+
+test-array() {
+    local sel="$1"
+
+    echo -n "    get..."
+    gget $IN_TPR $sel out.gps >out.log 2>&1
+    test $? -eq 0 && echo OK || fail
+
+    echo -n "    set..."
+
+    test $? -eq 0 && echo OK || fail
+}

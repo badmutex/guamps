@@ -106,6 +106,9 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
   case RVEC_T:
     ok = guamps_fread_rvec(fh, &data->value.v_rvec);
     break;
+  case ARRAY_T:
+    ok = guamps_fread_array(fh, &data->value.v_array);
+    break;
   default:
     guamps_error("guamps_fread: unknown type: %s\n", GUAMPS_TYPE_NAMES[type]);
     ok = false;
@@ -113,6 +116,19 @@ bool guamps_fread(FILE *fh, const type_t type, data_t *data) {
   }
 
   return ok;
+}
+
+bool guamps_fread_scalar_type(FILE* fh, const type_t type, void* value) {
+  char *fmt;
+  if (!(fmt = guamps_type_format(type))) {
+    guamps_error("guamps_fread_scalar: Bad type! Scalars should be simple types.\n");
+    return false;
+  }
+
+  if (!guamps_fread_scalar(fh, fmt, value)) {
+    guamps_error("guamps_fread_scalar_type: Failed to read scalar\n");
+    return false;
+  }
 }
 
 bool guamps_fread_scalar(FILE *fh, const char *spec, void *value) {
@@ -209,6 +225,37 @@ bool guamps_fread_rvec(FILE *fh, rvec_t *value) {
   }
 
   return true;
+}
+
+bool guamps_fread_array(FILE* fh, array_t* array) {
+
+  int length;
+  type_t type;
+
+  const int buffer_size = 100;
+  char buffer[buffer_size];
+
+  // header values: length
+  if (
+      !guamps_read_vector_header("length", buffer, buffer_size, fh, "length: %d", &length, 1)
+      ||
+      !guamps_read_vector_header("type", buffer, buffer_size, fh, "type: %d", &type, 1))
+    { return false; }
+
+  /* type_t* type = GUAMPS_TYPE(elem_type); */
+
+  array = guamps_array_create(length, type);
+
+  // empty line
+  if (fgets(buffer, buffer_size, fh) == NULL) { perror("Error clearing empty line"); return NULL; }
+
+  void* elem = guamps_calloc_simple(type);
+  // read the remaining lines
+  for (int i=0; i<array->length; i++) {
+    guamps_fread_scalar_type(fh, type, elem);
+    guamps_array_set(array, i, elem);
+  }
+
 }
 
 /* *********************************************************************
@@ -603,7 +650,9 @@ bool guamps_fwrite_rvec(FILE *fh, const rvec *vec, const int length) {
 
 bool guamps_fwrite_array(FILE *fh, const array_t* array) {
 
-  fprintf(fh, "length: %d\n\n", array->length);
+  fprintf(fh, "length: %d\n", array->length);
+  fprintf(fh, "type: %d\n", array->type);
+  fprintf(fh, "\n");
 
   for (int i=0; i<array->length; i++) {
     guamps_fwrite_scalar_generic(fh, array->type, guamps_array_get(array, i));

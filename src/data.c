@@ -1,5 +1,75 @@
 #include "data.h"
 
+type_t* GUAMPS_TYPE(const char* str) {
+  type_t* t;
+  if      (0 == strcmp(str, "INT_T"))   { t = INT_T;   }
+  else if (0 == strcmp(str, "LLINT_T")) { t = LLINT_T; }
+  else if (0 == strcmp(str, "FLOAT_T")) { t = FLOAT_T; }
+  else if (0 == strcmp(str, "DOUBLE_T")){ t = DOUBLE_T;}
+  else if (0 == strcmp(str, "REAL_T"))  { t = REAL_T;  }
+  else if (0 == strcmp(str, "RVEC_T"))  { t = RVEC_T;  }
+  else if (0 == strcmp(str, "MATRIX_T")){ t = MATRIX_T;}
+  else if (0 == strcmp(str, "ARRAY_T")) { t = ARRAY_T; }
+  else {
+    guamps_error("GUAMPS_TYPE: Unknown type %s\n", str);
+  }
+  return t;
+}
+
+bool guamps_is_simple_type(const type_t type) {
+  switch (type) {
+  case INT_T:
+  case LLINT_T:
+  case FLOAT_T:
+  case DOUBLE_T:
+  case REAL_T:
+    return true;
+    break;
+
+  default:
+    return false;
+  }
+}
+
+char* guamps_type_format(const type_t type) {
+  if (!guamps_is_simple_type(type)) {
+    guamps_error("guamps_type_format: %s is not known as a simple type\n",
+		 GUAMPS_TYPE_NAMES[type]);
+    return NULL;
+  }
+
+  return GUAMPS_TYPE_SPEC[type];
+}
+
+void * guamps_calloc_simple(const type_t type) {
+  if (!guamps_is_simple_type(type)) {
+    guamps_error("guamps_calloc_simple: Expected simple type by got %s\n",
+		 GUAMPS_TYPE_NAMES[type]);
+    return NULL;
+  }
+
+  void* value;
+  switch (type) {
+  case INT_T:
+    value = calloc(sizeof(int),1); break;
+  case LLINT_T:
+    value = calloc(sizeof(long long int), 1); break;
+  case FLOAT_T:
+    value = calloc(sizeof(float), 1); break;
+  case DOUBLE_T:
+    value = calloc(sizeof(double), 1); break;
+  case REAL_T:
+    value = calloc(sizeof(real), 1); break;
+
+  default:
+    guamps_error("guamps_calloc_simple: Unknown simple type %s\n",
+		 GUAMPS_TYPE_NAMES[type]);
+    break;
+  }
+
+  return value;
+}
+
 void guamps_data_set(const type_t type, const void* val, data_t *data) {
 
   data->type = type;
@@ -92,6 +162,25 @@ void * guamps_data_get(const data_t *data) {
 
 }
 
+array_t * guamps_array_create(const int length, const type_t type) {
+  array_t * array = (array_t*)calloc(sizeof(array_t), 1);
+  array->length = length;
+  array->type   = type;
+
+  switch(type) {
+  case REAL_T:
+    array->array = (real*)calloc(sizeof(real), length);
+    break;
+
+  default:
+    guamps_error("guamps_array_new: Unknown array type %s\n", GUAMPS_TYPE_NAMES[type]);
+    return NULL;
+  }
+
+  return array;
+
+}
+
 void * guamps_array_get(const array_t* array, const int i) {
   switch (array->type) {
   case REAL_T:
@@ -102,4 +191,16 @@ void * guamps_array_get(const array_t* array, const int i) {
     guamps_error("guamps_array_get: Unknown array type %s\n", GUAMPS_TYPE_NAMES[array->type]);
     return NULL;
  }
+}
+
+bool guamps_array_set(const array_t* array, const int i, const void * value) {
+  switch(array->type) {
+  case REAL_T:
+    ((real*)array->array)[i] = *(real*)value;
+    break;
+
+  default:
+    guamps_error("guamps_array_set: Unknown array type %s\n", GUAMPS_TYPE_NAMES[array->type]);
+    return false;
+  }
 }
