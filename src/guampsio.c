@@ -72,7 +72,7 @@ trr_t * guamps_load_trr(const char *path, const index_t* frame) {
   unsigned long long int current_frame = 0;
   while(fread_trnheader(fh, &trr->header, &bOK)) {
     fread_htrn(fh, &trr->header, (rvec *)&trr->box, trr->x, trr->v, trr->f);
-    if (frame && current_frame == frame) { break; }
+    if (frame && current_frame == *frame) { break; }
     current_frame += 1;
   }
 
